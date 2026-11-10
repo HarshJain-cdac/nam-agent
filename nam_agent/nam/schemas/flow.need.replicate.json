@@ -1,0 +1,58 @@
+{
+  "title": "need.replicate result",
+  "description": "FRS F2, create by copy: the reference the officer gave, what it resolved to, and what the new case copied. The copy itself is the case's replica artifact.",
+  "type": "object",
+  "required": ["reference", "candidates", "copied"],
+  "additionalProperties": false,
+  "properties": {
+    "reference": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["ref", "tier", "case_key"],
+      "properties": {
+        "ref": {"type": "string", "maxLength": 120},
+        "tier": {"enum": ["case_key", "tender_no", "core", null]},
+        "case_key": {"type": ["string", "null"], "maxLength": 60}
+      }
+    },
+    "candidates": {
+      "type": "array", "maxItems": 10,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["case_key", "tender_no", "job_name", "match"],
+        "properties": {
+          "case_key": {"type": "string", "maxLength": 60},
+          "tender_no": {"type": ["string", "null"]},
+          "job_name": {"type": ["string", "null"]},
+          "match": {"enum": ["case_key", "tender_no", "core"]}
+        }
+      }
+    },
+    "copied": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["case_key", "tender_no", "subject", "counts", "complete", "classification"],
+      "properties": {
+        "case_key": {"type": "string", "maxLength": 60},
+        "tender_no": {"type": ["string", "null"]},
+        "subject": {"type": "string", "maxLength": 300},
+        "counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "complete": {"type": "boolean",
+                     "description": "False when the tender holds more than one KG record returns."},
+        "classification": {
+          "type": "object", "additionalProperties": false, "required": ["category", "subtype"],
+          "properties": {"category": {"$ref": "#/$defs/prediction"},
+                         "subtype": {"$ref": "#/$defs/prediction"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "prediction": {
+      "type": "object", "required": ["value", "basis", "confident"],
+      "properties": {
+        "value": {"type": ["string", "null"]},
+        "basis": {"type": "string"},
+        "confident": {"type": "boolean"}
+      }
+    }
+  }
+}

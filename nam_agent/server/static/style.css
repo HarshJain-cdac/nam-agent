@@ -1,0 +1,417 @@
+  *{box-sizing:border-box;margin:0}
+  /* the browser makes these 700 by default; the system has only 400 and 500 */
+  b,strong,h2,h3,h4,th{font-weight:var(--font-weight-medium)}
+  /* native checkboxes and radios take the accent, not the OS blue */
+  input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
+  /* Thin scrollbars in the token colour. Only the two standard properties:
+     styling ::-webkit-scrollbar as well makes the browser ignore them and
+     forces the old always-visible bar. */
+  *{scrollbar-width:thin;scrollbar-color:var(--scrollbar-thumb) transparent}
+  /* three fixed-height columns, each scrolling independently: the main
+     content's scrollbar sits at its own right edge (the "middle"), never over
+     the chat dock. */
+  body{background:var(--surface-bg);color:var(--text-ink);
+       font-family:var(--face-sans);font-size:var(--text-sm);line-height:var(--leading-normal);
+       display:flex;height:100vh;overflow:hidden}
+  #theme-toggle{margin-left:auto;display:inline-flex;background:transparent;border:var(--rule-width) solid transparent;
+                color:var(--text-muted);cursor:pointer;padding:var(--space-2)}
+  #theme-toggle:hover{color:var(--text-ink)}
+  main{flex:1;min-width:0;height:100vh;overflow-y:auto;padding:0 var(--space-8) var(--space-8)}
+  /* aligned schema: the column header IS the indigo chip, so labels line up
+     over their data (no separate, misaligned chip row). */
+
+  
+  /* No ligatures: Playfair Display SC draws fi and fl as lowercase glyphs,
+     so "Graph workflows" came out as "WORKfLOWS" between the small caps. */
+  h1{font-family:var(--face-display);font-size:var(--text-lg);font-weight:var(--font-weight-normal);line-height:var(--leading-snug);
+     font-variant-ligatures:none;margin-bottom:calc(var(--spacing) * 0.5)}
+  .sub{color:var(--text-faint);font-size:var(--text-xs);font-family:var(--face-mono)}
+  h2{font-family:var(--face-mono);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:var(--tracking-label);color:var(--text-muted);
+     font-weight:var(--font-weight-medium);margin:var(--space-6) 0 var(--space-2)}
+  
+  
+  
+  .map{display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-2)}
+  
+  /* Memory's pillars are uiCard (cls box); their link sits in the card's action slot. */
+  .box{min-width:118px}
+  .box b{font-size:var(--text-sm);font-weight:var(--font-weight-medium);display:block}
+  .box span{color:var(--text-muted);font-size:var(--text-xs)}
+  .arrow{align-self:center;color:var(--text-faint);padding:0 var(--space-2);font-size:var(--text-sm)}
+  /* Card and Badge are primitives (js/ui.js: uiCard, uiBadge), after NAM harness
+     Memory's components/ui. */
+  .card{background:var(--surface-paper);border:var(--rule-width) solid var(--rule);border-radius:var(--radius);
+        padding:var(--space-4);margin-bottom:var(--space-3);position:relative}
+  .card-sm{padding:var(--space-3)}
+  .card-head{display:flex;align-items:baseline;gap:var(--space-3);margin-bottom:var(--space-2)}
+  .card-title{font-family:var(--face-display);font-size:var(--text-base);line-height:var(--leading-snug);
+              font-variant-ligatures:none}
+  .card-action{margin-left:auto}
+  .card-foot{display:flex;align-items:center;gap:var(--space-2);border-top:var(--rule-width) solid var(--rule);
+             background:var(--surface-raised);margin:var(--space-4) calc(var(--space-4) * -1) calc(var(--space-4) * -1);
+             padding:var(--space-3) var(--space-4)}
+  .badge{display:inline-flex;align-items:center;height:calc(var(--spacing) * 5);white-space:nowrap;
+         padding:calc(var(--spacing) * 0.5) var(--space-3);border:var(--rule-width) solid var(--rule);
+         border-radius:var(--shape-chip);font-family:var(--face-mono);font-size:var(--text-xs);
+         text-transform:uppercase;letter-spacing:var(--tracking-label);color:var(--text-muted);
+         margin-right:var(--space-2);vertical-align:middle}
+  .badge-ok{color:var(--ok);border-color:currentColor}
+  .badge-warn{color:var(--warn);border-color:currentColor}
+  .badge-bad{color:var(--bad);border-color:currentColor}
+  .badge-live,.badge.retrieve{color:var(--accent-fg);border-color:var(--accent)}
+  .badge-miss{color:var(--text-faint);border-style:dashed}
+  .badge-value{text-transform:none;letter-spacing:0;color:var(--text-ink)}
+  /* The text's own box, so a capped badge can end in an ellipsis: text sitting
+     directly in the inline-flex badge is an anonymous flex item that
+     text-overflow cannot reach. */
+  .badge-t{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .pill{font-size:var(--text-xs);padding:calc(var(--spacing) * 0.5) var(--space-2);border-radius:var(--shape-chip);font-weight:var(--font-weight-medium)}
+  .pill.skip{background:var(--surface-raised);color:var(--accent-fg)}
+  /* overflow-wrap: a long unbroken token (a URL, a tool call's arguments)
+     breaks instead of widening the card past the chat column. */
+  .r{color:var(--text-muted);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--space-2)}
+  /* rendered markdown in chat replies (blocks handle their own spacing, so
+     they read as normal HTML, not pre-wrapped source) */
+  .r .mdp,.r .mdh,.r .mdlist,.r .mdtable{white-space:normal}
+  .r .mdp{margin:0 0 var(--space-2)} .r .mdp:last-child{margin-bottom:0}
+  .r .mdh{font-weight:var(--font-weight-medium);color:var(--text-ink);margin:var(--space-2) 0 var(--spacing)}
+  .r .mdlist{margin:var(--spacing) 0 var(--space-2);padding-left:var(--space-4)} .r .mdlist li{margin:calc(var(--spacing) * 0.5) 0}
+  .r strong{font-weight:var(--font-weight-medium);color:var(--text-ink)} .r em{font-style:italic}
+  .r a{color:var(--accent-fg);text-decoration:underline}
+  .r .mdtable{border-collapse:collapse;margin:var(--space-2) 0;font-size:var(--text-xs);width:100%;display:block;overflow-x:auto}
+  .r .mdtable th,.r .mdtable td{border:1px solid var(--rule-hard);padding:var(--spacing) var(--space-2);text-align:left;white-space:nowrap}
+  .r .mdtable th{background:var(--surface-bg);font-weight:var(--font-weight-medium);color:var(--text-ink)}
+  /* fenced code blocks */
+  .mdcode{border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:var(--space-2) 0;
+          background:var(--surface-sunk)}
+  .mdcode-head{display:flex;align-items:center;justify-content:space-between;padding:var(--spacing) var(--space-3);
+               border-bottom:1px solid var(--rule);background:var(--surface-raised)}
+  .mdcode-lang{font-family:var(--face-mono);font-size:var(--text-xs);text-transform:uppercase;
+               letter-spacing:var(--tracking-label);color:var(--text-faint);font-weight:var(--font-weight-medium)}
+  .mdcode-copy.copied{color:var(--ok)}
+  .mdcode pre{margin:0;padding:var(--space-3) var(--space-3);overflow-x:auto;font-family:var(--face-mono);
+              font-size:var(--text-xs);line-height:var(--leading-normal);color:var(--text-muted);white-space:pre}
+  .mdcode code{font-family:var(--face-mono);background:none;border:none;padding:0;border-radius:0;font-size:var(--text-xs)}
+  /* horizontal rule */
+  .mdhr{border:none;border-top:1px solid var(--rule-hard);margin:var(--space-3) 0}
+  /* copy-message button — appears on card hover */
+  /* the copy button on a chat card (a uiButton) shows on hover */
+  .btn.msg-copy{display:none;position:absolute;top:var(--space-2);right:var(--space-3);z-index:var(--z-inside)}
+  .card:hover .msg-copy{display:block}
+  .msg-copy.copied{color:var(--ok)}
+  .meta{color:var(--text-faint);font-size:var(--text-xs);margin-top:var(--space-2);font-variant-numeric:tabular-nums}
+  .tool{border:1px solid var(--rule);border-radius:var(--radius);padding:var(--space-2) var(--space-2);margin-top:var(--space-2);background:var(--surface-bg)}
+  .tool.error{border-color:var(--bad);background:var(--surface-raised)}
+  .tool.warn{border-color:var(--rule-hard)}
+  .tool-head{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs)}
+  .dot{width:7px;height:7px;border-radius:var(--shape-circle);flex-shrink:0;background:var(--ok)}
+  .dot.error{background:var(--bad)} .dot.warn{background:var(--warn)}
+  .tool code{border:none;background:transparent;padding:0;color:var(--text-ink)}
+  .tool details{margin-top:var(--space-2)}
+  .tool summary{font-size:var(--text-xs);color:var(--text-faint);cursor:pointer;list-style:none}
+  .tool pre{font-family:var(--face-mono);font-size:var(--text-xs);color:var(--text-muted);white-space:pre-wrap;
+            word-break:break-all;margin-top:var(--space-2);max-height:180px;overflow:auto}
+  .live{display:inline-flex;align-items:center;gap:var(--space-2)}
+  .live .dot{animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  /* streaming caret — the token-by-token "thinking" cursor */
+  .caret{display:inline-block;width:7px;height:14px;margin-left:calc(var(--spacing) * 0.5);vertical-align:text-bottom;
+         background:var(--accent);border-radius:var(--radius);animation:blink 1s step-start infinite}
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.caret{animation:none}}
+  @keyframes flowdash{to{stroke-dashoffset:-22}}
+  .arch-status{font-size:var(--text-xs);font-weight:var(--font-weight-medium);color:var(--accent-fg);text-transform:none;
+               letter-spacing:0;margin-left:var(--space-2)}
+  
+  .msg{border:1px solid var(--rule);border-radius:var(--radius);padding:var(--space-2) var(--space-3);max-width:78%}
+  .msg.user{align-self:flex-end;background:var(--chat-user-bg);border-color:var(--chat-user-bg);color:var(--chat-user-fg)}
+  .msg.user .who, .msg.user a, .msg.user code{color:var(--chat-user-fg)}
+  .msg.assistant{align-self:flex-start;background:var(--chat-reply-bg);border-color:var(--chat-reply-edge);border-left:3px solid var(--accent)}
+  .msg .who{font-family:var(--face-mono);font-size:var(--text-xs);color:var(--text-faint);font-weight:var(--font-weight-medium);text-transform:uppercase;letter-spacing:var(--tracking-label);margin-bottom:var(--spacing)}
+  
+  .chip-c{display:inline-block;font-size:var(--text-xs);font-weight:var(--font-weight-medium);padding:calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);border-radius:var(--shape-chip);
+          background:var(--surface-raised);color:var(--ok);text-transform:none;letter-spacing:0;vertical-align:middle}
+  .teletoggle.on{background:var(--surface-raised);color:var(--text-ink);border-color:var(--rule-hard)}
+  /* session picker in the chat surfaces */
+  /* wrap, don't overflow: the dock is ~230px wide when the window is narrow, and
+     a nowrap row pushed the model chip and Send button clean off the screen.
+     min-width:0 is the other half — without it a flex child refuses to shrink
+     below its content and the row overflows even when it IS allowed to wrap. */
+  .sesshead{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2);flex-wrap:wrap;min-width:0}
+  /* The three buttons share the row, so its right edge lines up with the
+     model chip under it. */
+  .sesshead .sessbtn{flex:1 1 auto}
+  /* per-turn stats (gate/seconds/iters/tools) hide together when toggled off */
+  body.no-tele .chatlog .tele{display:none}
+  /* Every <select> looks like the model chip above: one dropdown across the
+     dashboard, the design owner's call on 2026-09-13. The browser's arrow goes
+     and the chip's caret takes its place, drawn as two half-squares of
+     gradient rather than an SVG, because a gradient can read --text-faint and
+     follow the theme while an image cannot. A select inside a form keeps the
+     form's taller padding (.fld, .addmodel) so it lines up with the input
+     beside it. */
+  select{-webkit-appearance:none;appearance:none;appearance:base-select;cursor:pointer;outline:none;
+         background-color:var(--surface-raised);border:var(--rule-width) solid var(--rule-hard);border-radius:var(--radius);
+         color:var(--text-ink);font-family:var(--face-mono);font-size:var(--text-xs);line-height:var(--leading-snug);
+         padding:var(--spacing) var(--space-6) var(--spacing) var(--space-2);
+         background-image:linear-gradient(to bottom left,var(--text-faint) 50%,transparent 50%),
+                          linear-gradient(to bottom right,var(--text-faint) 50%,transparent 50%);
+         background-size:var(--spacing) calc(var(--spacing) * 1.25);
+         background-position:right calc(var(--space-2) + var(--spacing)) center,right var(--space-2) center;
+         background-repeat:no-repeat}
+  select:hover,select:focus{border-color:var(--accent)}
+  /* A select's open list is the dashboard's menu (.menu): Chrome draws it
+     from CSS once the select is appearance:base-select. A browser without
+     that drops these rules and keeps its own list. The chip's caret is
+     already drawn, so the built-in icon and checkmark go. */
+  select:open{border-color:var(--accent)}
+  ::picker(select){appearance:base-select;background:var(--surface-paper);border:var(--rule-width) solid var(--rule-hard);
+    border-radius:var(--radius);padding:calc(var(--spacing) * 1.5);margin-block:calc(var(--spacing) * 1.5);box-shadow:var(--shadow-md);
+    position-try-order:normal}
+  /* Chrome opens the list on whichever side has more room, so a select low
+     on the page opened upward. normal keeps it below, like .menu, and flips
+     it only when it does not fit. */
+  select::picker-icon{display:none}
+  select option::checkmark{display:none}
+  select option{padding:var(--space-2);border-radius:var(--radius);font-family:var(--face-mono);font-size:var(--text-xs);
+    color:var(--text-ink);cursor:pointer}
+  select option:checked{color:var(--accent-fg)}
+  select option:hover,select option:focus-visible{background:var(--surface-raised)}
+  
+  
+  
+  
+  
+  
+  /* Chat (17C): your message is a rounded bubble whose corner nearest you
+     stays square; the NAM harness's reply has no box, so the two sides read apart. */
+  .chatlog{display:flex;flex-direction:column;gap:var(--space-4)}
+  /* overflow-wrap: a long unbroken word in your message wraps instead of
+     pushing the chat column sideways (same rule as .r). */
+  .bubble{align-self:flex-end;background:var(--chat-user-bg);color:var(--chat-user-fg);border:var(--rule-width) solid var(--chat-user-bg);padding:var(--space-2) var(--space-3);
+          border-radius:var(--shape-bubble);border-bottom-right-radius:var(--radius);max-width:75%;font-size:var(--text-sm);overflow-wrap:anywhere}
+  /* the NAM harness's reply keeps its card, on the page ground so it reads against
+     the paper dock. Your message is the rounded bubble; the card is square. */
+  #dock .card{background:var(--chat-reply-bg);border-color:var(--chat-reply-edge);border-left:3px solid var(--accent)}
+  .bubble a, .bubble code{color:var(--chat-user-fg)}
+  /* the agent's question with its choices (askRow in render.js) */
+  /* how a turn was made: a dropdown that starts closed (render.js turnDetails) */
+  .turn-details{margin-bottom:var(--space-2)}
+  .turn-details>summary{cursor:pointer;color:var(--text-muted);font-size:var(--text-xs);
+      list-style-position:inside}
+  .turn-details[open]>summary{margin-bottom:var(--space-2)}
+  .turn-undo{display:flex;justify-content:flex-end;margin-top:var(--space-2)}
+  .ask{margin-top:var(--space-3);padding-top:var(--space-3);border-top:var(--rule-width) solid var(--chat-reply-edge)}
+  .ask-q{color:var(--text-ink);font-weight:var(--font-weight-medium);margin-bottom:var(--space-2)}
+  .ask-opts{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  .ask-opts .btn-secondary{border-color:var(--accent);color:var(--accent-fg)}
+  .ask-step{font-size:var(--text-xs);color:var(--accent-fg);letter-spacing:var(--tracking-label);
+      text-transform:uppercase;margin-bottom:var(--space-2)}
+  .ask-hint{color:var(--text-muted);font-size:var(--text-xs);margin-bottom:var(--space-2)}
+  .ask-opts .btn.on{border-color:var(--accent-fg);color:var(--accent-fg);background:var(--surface-sunk)}
+  /* the NAM cards (render.js namCard): a PUR case with its matching items,
+     the PUR ranking, a PR. Colours are theme.css's tokens. */
+  .nam-cards{margin-top:var(--space-4)}
+  .nc-group{display:flex;align-items:center;gap:var(--space-2);color:var(--text-muted);font-size:var(--text-xs);
+      letter-spacing:var(--tracking-label);text-transform:uppercase;margin-bottom:var(--space-2)}
+  .nc-group span{color:var(--text-faint)}
+  .nc-yearhead{font-weight:var(--font-weight-medium);color:var(--text-ink);font-size:var(--text-base);
+      margin:var(--space-3) 0 var(--space-2)}
+  .nc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:var(--space-3)}
+  .nc{border:var(--rule-width) solid var(--rule);border-radius:var(--shape-card);padding:var(--space-4);
+      background:var(--surface-raised);display:flex;flex-direction:column;gap:var(--space-3);min-width:0}
+  .nc-head{display:flex;gap:var(--space-2);align-items:center;justify-content:space-between}
+  .nc-title{font-weight:var(--font-weight-medium);color:var(--text-ink);font-size:var(--text-base);
+      line-height:var(--leading-snug);min-width:0;overflow-wrap:anywhere}
+  .nc-badge{flex:none;font-size:var(--text-sm);font-weight:var(--font-weight-medium);color:var(--ok);
+      border:var(--rule-width) solid currentColor;border-radius:var(--shape-chip);padding:0 var(--space-3)}
+  .nc-sub{color:var(--text-ink);font-size:var(--text-sm);line-height:var(--leading-normal);overflow-wrap:anywhere}
+  .nc-chips{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  .nc-chips span{font-size:var(--text-sm);color:var(--text-muted);border:var(--rule-width) solid var(--rule-hard);
+      border-radius:var(--shape-chip);padding:0 var(--space-3)}
+  .nc-chips span.on{color:var(--accent-fg);border-color:var(--accent)}
+  .nc-pill{font-size:var(--text-sm);border-radius:var(--shape-chip);padding:0 var(--space-3);
+      border:var(--rule-width) solid currentColor}
+  .nc-ok{color:var(--ok)}
+  .nc-warn{color:var(--warn)}
+  .nc-bad{color:var(--bad)}
+  .nc-neutral{color:var(--text-muted)}
+  .nc-items{display:flex;flex-direction:column;gap:var(--space-2);border-top:var(--rule-width) dashed var(--rule-hard);
+      padding-top:var(--space-3)}
+  .nc-more{display:none}
+  .nc.nc-open .nc-more{display:block}
+  .nc-item{display:flex;gap:var(--space-2);align-items:flex-start;cursor:pointer;background:var(--surface-sunk);
+      border-left:calc(var(--rule-width) * 4) solid var(--rule-hard);border-radius:var(--radius);padding:var(--space-3)}
+  .nc-item.nc-full{border-left-color:var(--ok)}
+  .nc-item input{margin-top:var(--spacing)}
+  .nc-item-body{display:flex;flex-direction:column;gap:var(--spacing);min-width:0}
+  .nc-item-head{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
+  .nc-code{font-family:var(--face-mono);font-size:var(--text-sm);color:var(--text-ink)}
+  .nc-match{font-size:var(--text-xs);font-weight:var(--font-weight-medium);color:var(--accent-fg);
+      border:var(--rule-width) solid var(--accent);border-radius:var(--shape-chip);padding:0 var(--space-2)}
+  .nc-item-title{font-size:var(--text-sm);color:var(--text-ink);overflow-wrap:anywhere}
+  .nc-item-detail{font-size:var(--text-sm);color:var(--text-muted);line-height:var(--leading-normal);overflow-wrap:anywhere}
+  .nc-fields{display:grid;grid-template-columns:auto 1fr;column-gap:var(--space-3);row-gap:var(--spacing);
+      font-size:var(--text-sm);border-top:var(--rule-width) dashed var(--rule-hard);padding-top:var(--space-3)}
+  .nc-fields dt{color:var(--text-muted)}
+  .nc-fields dd{color:var(--text-ink);min-width:0;overflow-wrap:anywhere}
+  .nc-fields dd.nc-code{font-family:var(--face-mono);color:var(--text-muted)}
+  .nc-fields dd.nc-missing{color:var(--warn)}
+  .nc-foot,.nc-note{font-size:var(--text-sm);color:var(--text-muted)}
+  .nc-act{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+  .chatbar{display:flex;gap:var(--space-2);padding:var(--space-3) 0;border-top:1px solid var(--rule);
+           background:var(--surface-bg);position:sticky;bottom:0;min-width:0}
+  /* the chat side-dock: chat from any tab, watch the harness in main */
+  /* The page is never covered, and the chat is always resizable. The dock
+     sits beside main and gives up width first: it keeps the width you
+     dragged it to while main still has --main-min, and shrinks toward
+     260px when it does not. The drag handle stops at the same limit
+     (wireChrome in main.js), so dragging can never squeeze the page. */
+  #dock{width:clamp(260px, var(--dock-w,380px), calc(100vw - var(--rail-w,196px) - 5px - var(--main-min)));flex-shrink:0;border-left:1px solid var(--rule);
+        height:100vh;display:flex;flex-direction:column;background:var(--surface-paper);padding:0 var(--space-3)}
+  body:has(.rail.collapsed){--rail-w:56px}
+  /* Chat on the full page: pull the handle past its widest split position
+     (wireResizer in main.js). The rail and the page step aside; pulling the
+     handle back right returns the split. */
+  body.dock-full:not(.dock-closed) main{display:none}
+  body.dock-full:not(.dock-closed) #dock{width:auto;flex:1;padding:0 var(--space-8)}
+  body.dock-full:not(.dock-closed) #dock .chatlog, body.dock-full:not(.dock-closed) #dock .chatbar{width:100%;max-width:calc(var(--page) * 1.3);margin:0 auto}
+  /* The generated NIT beside the chat (render.js openNit): NIT 65, chat 35.
+     The rail and the page step aside while it is open; Close brings them back. */
+  #nitpane{display:none}
+  body.nit-open main{display:none}
+  body.nit-open #nitpane{display:flex;flex-direction:column;flex:0 0 65%;min-width:0;height:100vh;
+                         background:var(--surface-paper);padding:0 var(--space-3)}
+  body.nit-open #dock{flex:0 0 35%;width:35%;min-width:0;padding:0 var(--space-3)}
+  /* The NIT as the filled template (nit-forge-ui's NitPaper): a page with
+     the letterhead, the sections as tables. Filled rows read as text; a KG
+     suggestion is accent-coloured with its source and Accept / Change; a
+     missing row is a red gap with Fill. */
+  .nit-scroll{flex:1;overflow-y:auto;padding:var(--space-4) 0 var(--space-6)}
+  .nit-status{font-family:var(--face-mono);font-size:var(--text-xs);color:var(--text-muted);text-align:right}
+  .nit-sheet{max-width:860px;margin:0 auto;padding:var(--space-8);background:var(--surface-paper);
+             border:var(--rule-width) solid var(--rule-hard);border-radius:var(--radius);color:var(--text-ink)}
+  .nit-stamp{display:flex;justify-content:flex-end;margin-bottom:var(--space-3)}
+  .nit-stamp span{border:var(--rule-width) solid var(--warn);color:var(--warn);font-family:var(--face-mono);
+                  font-size:var(--text-xs);letter-spacing:var(--tracking-label);text-transform:uppercase;
+                  padding:calc(var(--spacing) * 0.5) var(--space-2);border-radius:var(--radius)}
+  .nit-letter{text-align:center;border-bottom:2px solid var(--text-ink);padding-bottom:var(--space-4)}
+  .nit-org{font-family:var(--face-display);font-size:var(--text-lg);font-weight:var(--font-weight-medium);margin:0}
+  .nit-sub{font-size:var(--text-xs);color:var(--text-muted);margin:var(--space-2) 0 0;letter-spacing:var(--tracking-label)}
+  .nit-doc-title{font-family:var(--face-display);font-size:var(--text-base);text-align:center;text-transform:uppercase;
+                 letter-spacing:var(--tracking-label);margin:var(--space-6) 0 var(--space-2)}
+  .nit-refs{text-align:center;font-size:var(--text-xs);color:var(--text-muted);display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap}
+  .nit-intro{font-family:var(--face-display);font-size:var(--text-sm);line-height:var(--leading-normal);margin:var(--space-6) 0}
+  .nit-sec{font-size:var(--text-sm);font-weight:var(--font-weight-medium);text-transform:uppercase;letter-spacing:var(--tracking-label);
+           background:var(--text-ink);color:var(--surface-paper);padding:var(--space-2) var(--space-3);margin:var(--space-6) 0 0}
+  .nit-tbl{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
+  .nit-tbl th,.nit-tbl td{border:var(--rule-width) solid var(--rule-hard);padding:var(--space-2) var(--space-3);
+                          text-align:left;vertical-align:top;white-space:pre-wrap}
+  .nit-tbl th{width:32%;background:var(--surface-sunk);font-weight:var(--font-weight-medium)}
+  .nit-tbl .nit-items th{width:auto}
+  .nit-sugg{color:var(--accent-fg)}
+  .nit-gap{color:var(--bad);font-family:var(--face-mono);font-size:var(--text-xs)}
+  .nit-src{display:block;font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-2);white-space:normal}
+  .nit-acts{display:flex;gap:var(--space-2);margin-top:var(--space-2)}
+  .nit-prov{font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-6)}
+  .dockhead{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-4) calc(var(--spacing) * 0.5) var(--space-2);
+            border-bottom:1px solid var(--rule)}
+  .dockhead .dt{font-family:var(--face-mono);font-size:var(--text-xs);font-weight:var(--font-weight-medium);
+                letter-spacing:var(--tracking-label);text-transform:uppercase}
+  .dockhead .arch-status{flex:1}
+  #dock .chatlog{flex:1;overflow-y:auto;padding:var(--space-3) calc(var(--spacing) * 0.5)}
+  /* The dock is paper, like the rail: the two tool columns frame the page. */
+  #dock .chatbar{padding:var(--space-3) 0 var(--space-4);background:var(--surface-paper)}
+  body.dock-closed #dock{display:none}
+  /* min-width:0 is what actually makes `flex:1` shrink. flex:1 sets the basis
+     to 0, but a flex item's default min-width is `auto` — its intrinsic content
+     width — so the input refused to go below that and pushed Send off the edge
+     of the dock. The buttons then get flex-shrink:0 so the input absorbs the
+     squeeze instead of the controls turning into slivers. */
+  .chatbar input{flex:1;min-width:0;background:transparent;border:var(--rule-width) solid var(--input);border-radius:var(--radius);
+                 padding:var(--space-2) var(--space-3);color:var(--text-ink);font-size:var(--text-sm);outline:none}
+  .chatbar input:focus{border-color:var(--accent)}
+  .chatbar button{flex-shrink:0}
+  .chatbar button:disabled{cursor:default}
+  .stages{display:flex;flex-wrap:wrap;gap:calc(var(--spacing) * 1.5);margin:calc(var(--spacing) * 0.5) 0 var(--spacing)}
+  /* In the chat dock a badge can be wider than the whole column (a tool name
+     at 260px). The row wraps, and a badge still too wide for a row of its own
+     is cut with an ellipsis; toolChip puts the full name in its title. The cap
+     leaves room for the badge's own margin-right. */
+  .stages .badge{max-width:calc(100% - var(--space-2));min-width:0}
+  .stage{font-size:var(--text-xs);padding:calc(var(--spacing) * 0.5) var(--space-2);border-radius:var(--shape-chip);border:1px solid var(--rule-hard);color:var(--text-faint)}
+  .stage.on{border-color:var(--accent);color:var(--accent-fg);background:var(--surface-raised)}
+  .stage.done{border-color:var(--ok);color:var(--ok)}
+  table{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
+  td,th{padding:var(--space-2) var(--space-2);border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  th{font-family:var(--face-mono);color:var(--text-faint);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:var(--tracking-label);font-weight:var(--font-weight-medium)}
+  .empty{color:var(--text-faint);font-style:normal;font-size:var(--text-sm)}
+  code{font-family:var(--face-mono);font-size:var(--text-xs);background:var(--surface-bg);border:1px solid var(--rule);
+       padding:calc(var(--spacing) * 0.5) var(--spacing);border-radius:var(--radius)}
+  .chip{font-size:var(--text-xs);color:var(--text-muted);border:1px solid var(--rule-hard);border-radius:var(--shape-chip);padding:calc(var(--spacing) * 0.5) var(--space-2)}
+  /* A graph node's chip while it WORKS, and after. Several .live at once is
+     the fan-out made visible in the chat card — the pending state used to say
+     only "thinking…" for the whole thirteen seconds of a gather. */
+  .chip.live{color:var(--accent-fg);border-color:var(--accent);background:var(--surface-raised)}
+
+/* Below 768 the rail becomes a row across the top (Memory's ConsoleTopNav):
+   the current page stays readable without opening anything. The row scrolls
+   sideways; the theme toggle stays pinned at its right end. */
+@media (max-width:767px){
+  body{flex-direction:column;height:auto;min-height:100vh;overflow:auto}
+  main{height:auto;padding:0 var(--space-4) var(--space-8)}
+  #dock{position:fixed;inset:0;width:auto;height:100vh;z-index:var(--z-dialog);border-left:none}
+  /* narrow screens: the NIT on top, the chat under it */
+  body.nit-open #nitpane{position:fixed;inset:0 0 auto 0;height:55vh;z-index:var(--z-dialog)}
+  body.nit-open #dock{top:55vh;height:45vh;width:auto}
+}
+.tab{position:relative;font-size:var(--text-sm);font-weight:var(--font-weight-medium);color:var(--text-muted);
+     text-decoration:none;white-space:nowrap;padding:calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5) var(--space-3)}
+.tab:hover,.tab.on{color:var(--text-ink)}
+.tab.on::after{content:"";position:absolute;left:0;right:0;bottom:calc(var(--rule-width) * -1);height:2px;background:var(--text-ink)}
+
+/* ---- Button, Link, Menu (js/ui.js) — shared memory's button.tsx and menus -- */
+/* Nothing fills: weight comes from the border and the label. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--control-gap);white-space:nowrap;cursor:pointer;
+     font-family:var(--face-mono);font-size:var(--text-xs);font-weight:var(--font-weight-medium);text-transform:uppercase;
+     letter-spacing:var(--tracking-label);line-height:1;padding:var(--control-pad-y) var(--control-pad-x);
+     border:var(--rule-width) solid transparent;background:transparent;color:var(--text-muted);text-decoration:none}
+.btn-sm{padding:var(--space-2) var(--space-4)}
+.btn-primary{background:var(--surface-paper);border-color:var(--rule-hard);color:var(--text-ink)}
+.btn-primary:hover{border-color:var(--accent)}
+.btn-secondary{border-color:var(--rule)}
+.btn-secondary:hover{border-color:var(--rule-hard);color:var(--text-ink)}
+.btn-tertiary:hover{color:var(--text-ink)}
+.btn-tertiary.btn-sm{padding:calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5)}
+.btn-destructive{background:var(--surface-paper);border-color:var(--rule-hard);color:var(--bad)}
+.btn-destructive:hover{border-color:var(--bad)}
+.btn-danger,.btn-danger:hover{color:var(--bad)}
+/* Link: for going somewhere. A hairline underline that turns amber on hover. */
+.link{color:var(--accent-fg);text-decoration:underline;text-decoration-thickness:var(--rule-width);
+      text-underline-offset:calc(var(--spacing) * 0.5);text-decoration-color:var(--rule-hard);cursor:pointer}
+.link:hover{text-decoration-color:var(--accent)}
+/* Menu (15B): paper, a hard rule, the hovered item one step raised, the
+   current item in accent text. Memory's DropdownMenu follows the same look. */
+.menu{position:fixed;box-shadow:var(--shadow-md);z-index:var(--z-menu);min-width:calc(var(--spacing) * 32);max-width:calc(100vw - var(--space-8));max-height:70vh;overflow-y:auto;
+      background:var(--surface-paper);border:var(--rule-width) solid var(--rule-hard);border-radius:var(--radius);
+      padding:calc(var(--spacing) * 1.5)}
+.menu-label{font-family:var(--face-mono);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:var(--tracking-label);
+            color:var(--text-faint);padding:var(--spacing) var(--space-2)}
+.menu-item{display:flex;align-items:baseline;gap:var(--space-2);width:100%;text-align:left;cursor:pointer;
+           background:transparent;border:var(--rule-width) solid transparent;border-radius:var(--radius);padding:var(--space-2);
+           font-family:var(--face-sans);font-size:var(--text-xs);line-height:var(--leading-snug);color:var(--text-ink)}
+.menu-item:hover,.menu-item:focus-visible{background:var(--surface-raised)}
+.menu-item.on{color:var(--accent-fg)}
+.menu-item.danger{color:var(--bad)}
+.menu-sub{margin-left:auto;padding-left:var(--space-2);font-family:var(--face-mono);color:var(--text-faint)}
+.menu-sep{height:var(--rule-width);background:var(--rule);margin:var(--spacing) 0}
+.menu-empty{padding:var(--space-2);font-size:var(--text-xs);color:var(--text-faint)}
+.menu-item code{font-family:var(--face-mono);font-size:var(--text-xs);background:none;border:none;padding:0;white-space:nowrap}
+.menu-sub{white-space:nowrap}
+/* A row wraps rather than scrolls: the sub label keeps to the right and drops
+   to its own line when the title needs the room, and a long id breaks
+   anywhere. The history menu scrolled sideways before, which hid the start
+   of every row behind a scrollbar. */
+.menu{overflow-x:hidden}
+.menu-item{flex-wrap:wrap;overflow-wrap:anywhere}

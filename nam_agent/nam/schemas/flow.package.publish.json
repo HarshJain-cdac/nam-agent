@@ -1,0 +1,59 @@
+{
+  "title": "package.publish result",
+  "description": "FRS F40, F50: the Aarohan upload list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items",
+    "sent",
+    "aarohan_ref",
+    "aarohan"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "pattern": "^[a-z][a-z_]{1,40}$"
+          },
+          "doc_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "sent": {
+      "const": false
+    },
+    "aarohan_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    },
+    "aarohan": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

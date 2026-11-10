@@ -1,0 +1,118 @@
+{
+  "title": "quantity.finalise result",
+  "description": "FRS F10: the lines, which are incomplete, and what NRL ordered before for the lines with no quantity (suggestions only).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lines",
+    "complete",
+    "missing",
+    "suggestions"
+  ],
+  "properties": {
+    "lines": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item",
+          "qty",
+          "uom",
+          "material_code",
+          "source"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "qty": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "uom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          },
+          "material_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "missing": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      }
+    },
+    "suggestions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "line",
+          "item",
+          "uom",
+          "typical_qty",
+          "years",
+          "sources"
+        ],
+        "properties": {
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "item": {
+            "type": "string"
+          },
+          "uom": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "typical_qty": {
+            "type": "object"
+          },
+          "years": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "status": "EMPTY until NRL gives its delegation of authority: with no levels, the approver names the approving authority for each case. A level is {\"up_to\": rupees or null for no limit, \"authority\": \"...\"}, in ascending order; the first level whose up_to covers the estimated value applies",
+  "levels": []
+}

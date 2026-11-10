@@ -1,0 +1,45 @@
+{
+  "title": "need.classify result",
+  "description": "FRS F4, R1, R28: the case's classification as it stands, which of the three gate fields are still open, and what the confirmed category decides.",
+  "type": "object",
+  "required": ["classification", "confirmed", "open", "changed", "route"],
+  "additionalProperties": false,
+  "properties": {
+    "classification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["category", "procurement_type", "tender_type", "subtype"],
+      "properties": {
+        "category": {"$ref": "#/$defs/prediction"},
+        "procurement_type": {"$ref": "#/$defs/prediction"},
+        "tender_type": {"$ref": "#/$defs/prediction"},
+        "subtype": {"$ref": "#/$defs/prediction"}
+      }
+    },
+    "confirmed": {"type": "boolean",
+                  "description": "True when category, procurement type and tender type are all confirmed: the S1 gate (F4)."},
+    "open": {"type": "array", "items": {"enum": ["category", "procurement_type", "tender_type"]}},
+    "changed": {"enum": ["category", "procurement_type", "tender_type", "subtype", null],
+                "description": "The field this call set, or null."},
+    "route": {
+      "type": "object", "additionalProperties": false,
+      "required": ["category", "estimate_flow", "mandatory_documents", "guided_form"],
+      "properties": {
+        "category": {"enum": ["goods", "services", "works", null]},
+        "estimate_flow": {"enum": ["estimate.goods", "estimate.wage", "estimate.works", null]},
+        "mandatory_documents": {"type": "array", "items": {"type": "string", "maxLength": 40}},
+        "guided_form": {"enum": ["Goods", "Services", "New Works", "Repetitive Works", null],
+                        "description": "The F8 guided form for the case, once the category (and for Works the sub-type) is confirmed."}
+      }
+    }
+  },
+  "$defs": {
+    "prediction": {
+      "type": "object", "required": ["value", "basis", "confident"],
+      "properties": {
+        "value": {"type": ["string", "null"]},
+        "basis": {"type": "string"},
+        "confident": {"type": "boolean"}
+      }
+    }
+  }
+}

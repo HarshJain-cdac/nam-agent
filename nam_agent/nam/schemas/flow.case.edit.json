@@ -1,0 +1,114 @@
+{
+  "title": "case.edit result",
+  "description": "FRS F12, F42: the case's fields, what changed, and every change with its reason.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fields",
+    "changed",
+    "history"
+  ],
+  "properties": {
+    "fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "location",
+        "term",
+        "quantity",
+        "subtype"
+      ],
+      "properties": {
+        "location": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "term": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "quantity": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "subtype": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 60
+        }
+      }
+    },
+    "changed": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          },
+          "to": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_version",
+          "at",
+          "user",
+          "flow",
+          "reason"
+        ],
+        "properties": {
+          "case_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "at": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "user": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "flow": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "title": "NAM run request (nam.v1)",
+  "description": "POST /v1/nam/run. The backend calls it the way it would call an LLM: a short system prompt and the messages.",
+  "type": "object",
+  "required": [
+    "system",
+    "messages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "system": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "The call site's short instruction, e.g. 'Assess need for request #123'."
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 20000
+          }
+        }
+      }
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^NAM-\\d{4}-\\d{4,8}$",
+      "description": "The case to continue. Left out, a new case is opened."
+    },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The case version the caller last saw (case_version in the last response). If the case has changed since, the call is refused with stale_version and changes nothing."
+    },
+    "documents": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Documents of the case this call is about (ids from an upload), recorded with the call in the audit log. Flows read the case's documents from the document store themselves.",
+      "items": {
+        "type": "string",
+        "pattern": "^DOC-[0-9a-f]{12}$"
+      }
+    },
+    "answer": {
+      "type": "object",
+      "required": [
+        "question_id",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "The answer to an open question from the last response. value '' skips it.",
+      "properties": {
+        "question_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "confirm": {
+      "type": "object",
+      "required": [
+        "action_id"
+      ],
+      "additionalProperties": false,
+      "description": "Confirm the case's pending_action from the last response. It runs only for a role allowed to confirm it, and only if the case has not changed since it was proposed.",
+      "properties": {
+        "action_id": {
+          "type": "string",
+          "pattern": "^act_[a-z0-9]{4,32}$"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject"
+          ],
+          "description": "Default approve."
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Required to reject."
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skip_questions": {
+          "type": "boolean",
+          "description": "Stop the follow-up questions and go on with what is known."
+        },
+        "undo": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Need capture: take back the answer to this question, and every answer after it, and ask the same question again."
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Need capture: the category the officer picked before stating the need (goods, services or works)."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "title": "precedent.search result",
+  "description": "FRS F6: the past tenders like the need, ranked, with why each matched. Nothing is selected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query",
+    "added_terms",
+    "mode",
+    "total",
+    "best_similarity",
+    "candidates",
+    "selected"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "added_terms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "mode": {
+      "enum": [
+        "lexical",
+        "similar"
+      ]
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "best_similarity": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_key",
+          "tender_no",
+          "subject",
+          "rank",
+          "match_strength",
+          "match_basis",
+          "matching_items",
+          "matching_item_count"
+        ],
+        "properties": {
+          "case_key": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "tender_no": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "match_strength": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "How much of the need the tender's subject and line items contain (need.match_strength). Not an embedding similarity."
+          },
+          "match_basis": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "matching_items": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string"
+            }
+          },
+          "matching_item_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "selected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The precedent already selected, unchanged by a search."
+    }
+  }
+}

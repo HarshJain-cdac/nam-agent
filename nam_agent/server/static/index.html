@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Apply the stored theme before anything paints (see js/theme.js). -->
+<script>try{var t=localStorage.getItem("nam-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>Need Assessment</title>
+<link rel="stylesheet" href="/static/base.css">
+<link rel="stylesheet" href="/static/theme.css">
+<link rel="stylesheet" href="/static/style.css"></head><body class="dock-full">
+<!-- The generated NIT beside the chat, 65:35 (render.js openNit). -->
+<section id="nitpane" aria-label="Generated NIT">
+  <div class="dockhead">
+    <span class="dt" id="nit-title">NIT</span>
+    <span class="arch-status nit-status" id="nit-status"></span>
+    <button class="btn btn-tertiary btn-sm" onclick="downloadNit(null, true)" title="Download now, marked DRAFT, with the gaps printed">Download draft</button>
+    <button class="btn btn-primary btn-sm" id="nit-download" onclick="downloadNit()" disabled title="Active once every entry is filled">Download PDF</button>
+    <button class="btn btn-secondary btn-sm" onclick="closeNit()" title="Close the NIT">Close</button>
+  </div>
+  <div class="nit-scroll" id="nit-sheet"></div>
+</section>
+<aside id="dock">
+  <div class="dockhead">
+    <span class="dt">Need Assessment</span>
+    <span class="arch-status"></span>
+    <button id="theme-toggle" class="btn btn-tertiary btn-sm" onclick="cycleTheme()"></button>
+  </div>
+  <div class="sesshead" style="padding:8px 2px 0">
+    <button class="btn btn-secondary btn-sm sessbtn" onclick="newChat()">+ New chat</button>
+    <button class="btn btn-secondary btn-sm sessbtn" onclick="toggleSessMenu(event)">History &#9662;</button>
+    <button class="btn btn-secondary btn-sm sessbtn teletoggle" id="teletoggle" onclick="toggleTele()" title="Show/hide per-turn stats: gate decision, seconds, iterations, tools">stats</button>
+  </div>
+  <div class="chatlog" id="docklog"></div>
+  <div class="chatbar">
+    <input id="dmsg" placeholder="Message&hellip;" autocomplete="off">
+    <button id="dsend" class="btn btn-primary">Send</button>
+  </div>
+</aside>
+<!-- Classic scripts sharing one global scope (no build step, no modules);
+     main.js starts the page and loads last. static/README.md has the map. -->
+<script src="/static/js/util.js"></script>
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/render.js"></script>
+<script src="/static/js/dock.js"></script>
+<script src="/static/js/main.js"></script></body></html>

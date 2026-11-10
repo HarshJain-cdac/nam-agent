@@ -1,0 +1,42 @@
+{
+  "title": "case.status result",
+  "description": "Where a case stands. Reads the Need Record and writes nothing.",
+  "type": "object",
+  "required": ["stage", "need_stage", "requirement", "category", "selected_cases",
+               "related_cases", "open_question", "pending_action", "gates", "actions", "missing", "updated"],
+  "additionalProperties": false,
+  "properties": {
+    "stage": {"type": "string", "pattern": "^S\\d{1,2}$"},
+    "need_stage": {"type": "string"},
+    "requirement": {"type": "string"},
+    "category": {"type": ["string", "null"]},
+    "selected_cases": {"type": "array", "items": {"type": "string"}},
+    "related_cases": {"type": "integer", "minimum": 0},
+    "open_question": {
+      "type": ["object", "null"], "required": ["id", "text"], "additionalProperties": false,
+      "properties": {"id": {"type": "string"}, "text": {"type": "string"}}
+    },
+    "pending_action": {"type": ["object", "null"]},
+    "gates": {"type": "array", "items": {"type": "string"}},
+    "actions": {"type": "array", "items": {"type": "string"}},
+    "missing": {"type": "array", "items": {"type": "string"}},
+    "journey": {
+      "description": "Where the case is on the PR journey (nam_agent/nam/journey.py): the phase, the steps before, now and next, the next stage, and what the user still has to give.",
+      "type": "object", "required": ["phase", "previous_step", "step", "next_step", "next_stage", "to_give", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "phase": {"type": "string"},
+        "previous_step": {"type": ["string", "null"]},
+        "step": {"type": ["string", "null"]},
+        "next_step": {"type": ["string", "null"]},
+        "next_stage": {"type": ["object", "null"]},
+        "to_give": {"type": "array", "items": {"type": "string"}},
+        "text": {"type": "string"}
+      }
+    },
+    "updated": {
+      "type": "object", "required": ["at", "by"], "additionalProperties": false,
+      "properties": {"at": {"type": "string"}, "by": {"type": "string"}}
+    }
+  }
+}

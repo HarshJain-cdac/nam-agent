@@ -1,0 +1,25 @@
+{
+  "title": "NAM error body (nam.v1)",
+  "description": "Every failed call. The HTTP status comes from the code (see nam_agent/nam/errors.py).",
+  "type": "object",
+  "required": ["version", "error"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": "nam.v1"},
+    "run_id": {"type": "string", "pattern": "^run_[a-f0-9]{16}$"},
+    "case_id": {"type": "string", "pattern": "^NAM-\\d{4}-\\d{4,8}$"},
+    "error": {
+      "type": "object", "required": ["code", "message", "retryable"], "additionalProperties": false,
+      "properties": {
+        "code": {"enum": ["rate_limited", "bad_request", "schema", "identity_missing", "forbidden_role",
+                          "forbidden_tenant", "forbidden_action", "not_found",
+                          "method_not_allowed", "stage_gate", "stale_version", "in_progress", "too_large", "guardrail",
+                          "unsupported_type", "flow_not_built", "kg_unavailable", "model_unavailable",
+                          "ocr_unavailable", "internal", "internal_schema"]},
+        "message": {"type": "string", "maxLength": 500},
+        "retryable": {"type": "boolean"},
+        "details": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 300}}
+      }
+    }
+  }
+}

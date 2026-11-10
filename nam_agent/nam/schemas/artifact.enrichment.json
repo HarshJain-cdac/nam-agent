@@ -1,0 +1,75 @@
+{
+  "title": "enrichment artifact",
+  "description": "What need.enrich leaves (FRS F9): the tender records read, never selected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "sources",
+    "named",
+    "missing"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_key",
+          "selected",
+          "fields",
+          "awarded_to"
+        ],
+        "properties": {
+          "case_key": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "selected": {
+            "type": "boolean"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 300
+            }
+          },
+          "awarded_to": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        }
+      }
+    },
+    "named": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      }
+    },
+    "missing": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      }
+    }
+  }
+}

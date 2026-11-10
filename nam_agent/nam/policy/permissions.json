@@ -1,0 +1,212 @@
+{
+  "status": "DRAFT for review: drafted from the FRS roles, with the PR Creation Flow's acts; correct it before production use",
+  "roles": {
+    "U1": "Officer (user / indenting officer)",
+    "U2": "User department",
+    "U3": "Authorized user",
+    "U4": "Drafter",
+    "U5": "Functional reviewers",
+    "U6": "Commercial Officer / Commercial Department",
+    "U7": "Approver(s) in Aarohan"
+  },
+  "aliases": {
+    "officer": "U1",
+    "user_department": "U2",
+    "authorized_user": "U3",
+    "drafter": "U4",
+    "functional_reviewer": "U5",
+    "commercial": "U6",
+    "approver": "U7"
+  },
+  "flows": {
+    "need.capture": [
+      "U1"
+    ],
+    "need.replicate": [
+      "U1"
+    ],
+    "need.classify": [
+      "U1"
+    ],
+    "need.guided_form": [
+      "U1"
+    ],
+    "precedent.search": [
+      "U1"
+    ],
+    "precedent.select": [
+      "U1"
+    ],
+    "need.enrich": [
+      "U1",
+      "U3"
+    ],
+    "quantity.finalise": [
+      "U1"
+    ],
+    "material.suggest": [
+      "U1"
+    ],
+    "case.edit": [
+      "U1",
+      "U3"
+    ],
+    "estimate.goods": [
+      "U1",
+      "U6"
+    ],
+    "estimate.wage": [
+      "U1"
+    ],
+    "estimate.works": [
+      "U1"
+    ],
+    "docs.generate": [
+      "U1",
+      "U4"
+    ],
+    "docs.review": [
+      "U4"
+    ],
+    "compliance.build": [
+      "U2"
+    ],
+    "validate": [
+      "U3",
+      "U5"
+    ],
+    "package.freeze": [
+      "U5"
+    ],
+    "pr.build": [
+      "U3"
+    ],
+    "pr.submit": [
+      "U3"
+    ],
+    "approval": [
+      "U7"
+    ],
+    "document.update": [
+      "U1",
+      "U3"
+    ],
+    "package.publish": [
+      "U6"
+    ],
+    "handoff.nit": [
+      "U6"
+    ],
+    "case.status": [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ],
+    "case.plan": [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ],
+    "case.ask": [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ]
+  },
+  "gates": {
+    "quantity": [
+      "U1"
+    ],
+    "estimate": [
+      "U1"
+    ],
+    "clauses": [
+      "U1",
+      "U4"
+    ],
+    "documents": [
+      "U4"
+    ]
+  },
+  "documents": {
+    "read": [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ],
+    "upload": [
+      "U1",
+      "U3",
+      "U4"
+    ],
+    "update": [
+      "U1",
+      "U3",
+      "U4"
+    ],
+    "delete": [
+      "U1",
+      "U3"
+    ]
+  },
+  "actions": {
+    "submit_pr": [
+      "U3"
+    ],
+    "freeze_package": [
+      "U5"
+    ],
+    "approve": [
+      "U7"
+    ],
+    "handoff_nit": [
+      "U6"
+    ],
+    "need": [
+      "U1",
+      "U2",
+      "U3"
+    ],
+    "estimate.build": [
+      "U1",
+      "U3"
+    ],
+    "estimate.lock": [
+      "U1",
+      "U3"
+    ],
+    "pr.fill": [
+      "U1",
+      "U3"
+    ],
+    "pr.confirm": [
+      "U1",
+      "U3"
+    ],
+    "case.read": [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ]
+  }
+}

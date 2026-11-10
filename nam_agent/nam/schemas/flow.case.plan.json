@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "flow.case.plan",
+  "description": "case.plan's result: the to-do list, the steps this call ran with whether each verified, and where it stopped.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal",
+    "complete",
+    "todo",
+    "ran",
+    "next_item",
+    "stopped"
+  ],
+  "properties": {
+    "goal": {
+      "type": "string",
+      "pattern": "^S([1-9]|10)$"
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "todo": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "n",
+          "flow",
+          "title",
+          "stage",
+          "status",
+          "roles",
+          "why"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "flow": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "stage": {
+            "type": "string",
+            "pattern": "^S([1-9]|10)$"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "done",
+              "waiting_input",
+              "waiting_approval",
+              "blocked"
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "maxItems": 7,
+            "items": {
+              "type": "string",
+              "maxLength": 10
+            }
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "ran": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "flow",
+          "status",
+          "verified"
+        ],
+        "properties": {
+          "flow": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "next_item": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "stopped": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

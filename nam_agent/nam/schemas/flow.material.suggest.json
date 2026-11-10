@@ -1,0 +1,61 @@
+{
+  "title": "material.suggest result",
+  "description": "FRS F11: the suggestions, numbered for the officer's answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query",
+    "suggestions",
+    "picked"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "suggestions": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "n",
+          "item",
+          "source",
+          "spec",
+          "picked"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "item": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "spec": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "picked": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "picked": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

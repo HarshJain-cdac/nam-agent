@@ -1,0 +1,35 @@
+{
+  "title": "nam.route result",
+  "description": "The router's own answer, when no flow ran: which flows the prompt could mean (needs_input), or why it is outside NAM (refused).",
+  "type": "object",
+  "required": ["reason", "candidates", "refs"],
+  "additionalProperties": false,
+  "properties": {
+    "reason": {"type": "string", "maxLength": 500},
+    "candidates": {
+      "type": "array", "maxItems": 30,
+      "items": {
+        "type": "object", "required": ["flow", "title", "frs", "stage"], "additionalProperties": false,
+        "properties": {
+          "flow": {"type": "string"}, "title": {"type": "string"},
+          "frs": {"type": "array", "items": {"type": "string"}},
+          "stage": {"type": "string"}
+        }
+      }
+    },
+    "refs": {"$ref": "#/$defs/refs"}
+  },
+  "$defs": {
+    "refs": {
+      "type": "object", "additionalProperties": false,
+      "description": "Identifiers found in the system prompt.",
+      "properties": {
+        "case_id": {"type": "string"},
+        "request": {"type": "string"},
+        "tender": {"type": "string"},
+        "pr": {"type": "string"},
+        "po": {"type": "string"}
+      }
+    }
+  }
+}

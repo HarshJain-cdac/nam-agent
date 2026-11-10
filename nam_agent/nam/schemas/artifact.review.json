@@ -1,0 +1,98 @@
+{
+  "title": "review artifact",
+  "description": "What docs.review leaves (FRS F24): the findings on the drafts, what the drafter accepted and why.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "documents_version",
+    "findings",
+    "open",
+    "model_note"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "documents_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "severity",
+          "refs",
+          "says",
+          "source",
+          "accepted",
+          "why"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "kind": {
+            "enum": [
+              "conflict",
+              "vague",
+              "unclassified",
+              "model",
+              "pqc_threshold",
+              "incomplete_term",
+              "brand"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "fail",
+              "warn",
+              "info"
+            ]
+          },
+          "refs": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "says": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "source": {
+            "enum": [
+              "harness",
+              "model"
+            ]
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "open": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "model_note": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

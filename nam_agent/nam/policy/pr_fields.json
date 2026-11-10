@@ -1,0 +1,120 @@
+{
+  "status": "DRAFT for review: from FRS F27 (PR generator inputs) and entity E3 (SAP PR fields); the bulk-PR-upload Excel, which v3 names as the authoritative field list, is not available yet; item category, MRP controller, order, project and control code (SRS 2.2.3, E3) and budget head and financial category code (SRS 3.1.2) added as optional 2026-10-03; the cost centre defaults to the estimate's (F13)",
+  "header": {
+    "category": {
+      "label": "Category",
+      "from": "case",
+      "mandatory": true
+    },
+    "procurement_type": {
+      "label": "Type of procurement",
+      "from": "case",
+      "mandatory": true
+    },
+    "tender_type": {
+      "label": "Tender type",
+      "from": "case",
+      "mandatory": true
+    },
+    "date_opened": {
+      "label": "Date opened",
+      "from": "case",
+      "mandatory": true
+    },
+    "proposal_name": {
+      "label": "Name of the proposal",
+      "from": "case",
+      "mandatory": true
+    },
+    "estimated_value": {
+      "label": "Estimated value (Rs)",
+      "from": "estimate",
+      "mandatory": true
+    },
+    "justification": {
+      "label": "Justification for procurement",
+      "from": "form",
+      "mandatory": true
+    },
+    "cost_centre": {
+      "label": "Cost centre",
+      "from": "officer",
+      "mandatory": true
+    },
+    "plant": {
+      "label": "Plant",
+      "from": "officer",
+      "mandatory": true
+    },
+    "purchasing_group": {
+      "label": "Purchasing group",
+      "from": "officer",
+      "mandatory": true
+    },
+    "delivery_date": {
+      "label": "Delivery date (YYYY-MM-DD)",
+      "from": "form",
+      "mandatory": true
+    },
+    "pr_type": {
+      "label": "PR type",
+      "from": "officer",
+      "mandatory": false
+    },
+    "account_assignment": {
+      "label": "Account assignment category",
+      "from": "officer",
+      "mandatory": false
+    },
+    "material_group": {
+      "label": "Material group",
+      "from": "officer",
+      "mandatory": false
+    },
+    "gl_account": {
+      "label": "GL account",
+      "from": "officer",
+      "mandatory": false
+    },
+    "requisitioner": {
+      "label": "Requisitioner",
+      "from": "case",
+      "mandatory": false
+    },
+    "item_category": {
+      "label": "Item category",
+      "from": "officer",
+      "mandatory": false
+    },
+    "mrp_controller": {
+      "label": "MRP controller",
+      "from": "officer",
+      "mandatory": false
+    },
+    "order_number": {
+      "label": "Order (internal or maintenance order)",
+      "from": "officer",
+      "mandatory": false
+    },
+    "project": {
+      "label": "Project / WBS element",
+      "from": "officer",
+      "mandatory": false
+    },
+    "control_code": {
+      "label": "Control code (HSN/SAC)",
+      "from": "officer",
+      "mandatory": false
+    },
+    "budget_head": {
+      "label": "Budget head",
+      "from": "officer",
+      "mandatory": false
+    },
+    "financial_category_code": {
+      "label": "Financial category code",
+      "from": "officer",
+      "mandatory": false
+    }
+  }
+}

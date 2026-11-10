@@ -1,0 +1,117 @@
+{
+  "title": "compliance artifact",
+  "description": "What compliance.build leaves (FRS F26): each requirement, whether it applies and why, and the stored .docx.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "complete",
+    "category",
+    "requirements",
+    "doc_id",
+    "version"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "category": {
+      "enum": [
+        "goods",
+        "services",
+        "works"
+      ]
+    },
+    "requirements": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "basis",
+          "source",
+          "apply",
+          "why",
+          "by"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "basis": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "source": {
+            "enum": [
+              "policy",
+              "department"
+            ]
+          },
+          "apply": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "by": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "issued": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text",
+                "case_key"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "case_key": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "doc_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    }
+  }
+}

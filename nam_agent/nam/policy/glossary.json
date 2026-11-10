@@ -1,0 +1,30 @@
+{
+  "status": "DRAFT for review: short definitions of NAM terms that case.ask answers from; NRL may replace them with its Procurement Manual's wording",
+  "terms": {
+    "pqc": "Pre-Qualification Criteria: the experience, turnover and capability a bidder must show to have its bid considered.",
+    "scc": "Special Conditions of Contract: the terms specific to this contract (delivery, warranty, penalties) that add to or override the general conditions.",
+    "gcc": "General Conditions of Contract: NRL's standard terms that apply to every contract unless the SCC says otherwise.",
+    "boq": "Bill of Quantities: the itemised list of what is bought, each line with its quantity, unit and rate.",
+    "sor": "Schedule of Rates: an approved list of unit rates for standard works items; NRL SOR is NRL's own.",
+    "dsr": "Delhi Schedule of Rates (CPWD): a reference schedule for works rates, not NRL-approved, used with an alert when NRL SOR has no item.",
+    "dar": "Delhi Analysis of Rates (CPWD): the component analysis behind DSR rates.",
+    "nit": "Notice Inviting Tender: the tender document prepared after NAM, by the NIT module, from NAM's handoff package.",
+    "pr": "Purchase Requisition: the request to buy, raised in SAP (or Procurix.ai) with the items, quantities and estimated value.",
+    "po": "Purchase Order: the order placed with the selected vendor after the tender.",
+    "emd": "Earnest Money Deposit (bid security): the deposit a bidder pays with the bid; MSEs registered for the item are exempt.",
+    "mse": "Micro and Small Enterprise: gets purchase preference and EMD exemption under the Public Procurement Policy for MSEs Order, 2012.",
+    "doa": "Delegation of Authority: who may approve a procurement of what value.",
+    "aan": "Administrative Approval Note: the note that seeks approval for the procurement and its estimate.",
+    "ann": "Administrative Approval Note: the note that seeks approval for the procurement and its estimate.",
+    "sap": "SAP MM: NRL's ERP, where PRs and POs are recorded (not connected to NAM yet).",
+    "aarohan": "Aarohan: NRL's e-office system for files, approvals and document upload (not connected to NAM yet).",
+    "gem": "Government e-Marketplace: the government's online procurement platform.",
+    "l1": "The lowest evaluated bidder.",
+    "oem": "Original Equipment Manufacturer: the maker of the item; a bidder that is not the OEM may need its authorisation.",
+    "rate contract": "An agreement fixing rates for an item over a period, ordered against as needed.",
+    "new item": "An estimate line with no rate from any source: the officer gives its rate before the estimate is approved.",
+    "precedent": "A past NRL tender the officer selected to build this case from; NAM never selects one itself (R2).",
+    "varn": "The variation between a quoted rate and the last awarded rate, in percent (R10).",
+    "cagr": "The yearly growth rate between the awarded rate and the quoted rate over the years between them (R10)."
+  }
+}

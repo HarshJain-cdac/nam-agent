@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "artifact.handoff",
+  "description": "What handoff.nit leaves on the record: the frozen package version it hands to NIT and the structured data NIT reuses (FRS F43, F44).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "package_version"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "package_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "category",
+        "items",
+        "documents",
+        "pr",
+        "approval"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 2000,
+          "items": {
+            "type": "object"
+          }
+        },
+        "documents": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "pattern": "^[a-z][a-z_]{1,40}$"
+              },
+              "doc_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 80
+              },
+              "version": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "pr": {
+          "type": "object"
+        },
+        "approval": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

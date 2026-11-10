@@ -1,0 +1,80 @@
+{
+  "title": "approval_file artifact",
+  "description": "What approval leaves (FRS F37, F38, F45): the file, the approving authority and the ANN; complete once the authority is known.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "complete"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "file_number": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "aarohan_file": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    },
+    "route": {
+      "enum": [
+        "procurix",
+        "aarohan"
+      ]
+    },
+    "authority": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "authority_basis": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "estimated_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ann": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "doc_id",
+        "version"
+      ],
+      "properties": {
+        "doc_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

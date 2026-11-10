@@ -1,0 +1,75 @@
+{
+  "title": "published artifact",
+  "description": "What package.publish leaves (FRS F40, F50): the Aarohan upload list and the reference recorded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "items",
+    "sent",
+    "aarohan_ref",
+    "by",
+    "at"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "pattern": "^[a-z][a-z_]{1,40}$"
+          },
+          "doc_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "sent": {
+      "const": false
+    },
+    "aarohan_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    },
+    "by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 40
+    }
+  }
+}

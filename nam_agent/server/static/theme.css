@@ -1,0 +1,107 @@
+/* The dashboard's palette: light (also the default), dark following the
+   system, and dark chosen. Only colour tokens are declared here; sizes, type
+   and spacing are base.css's.
+
+   Light is white with cool greys and one blue accent; dark is a neutral dark
+   grey with light text and a lighter blue. Text on every ground meets WCAG
+   AA contrast. */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --surface-bg: #FFFFFF;
+  --surface-paper: #FFFFFF;
+  --surface-raised: #F7F9FC;
+  --surface-sunk: #EEF3FA;
+  --rule: #E6EBF2;
+  --rule-hard: #C9D4E3;
+  --text-ink: #111827;
+  --text-muted: #4B5563;
+  --text-faint: #5B6472;
+  --accent: #2563EB;
+  --accent-fg: #1D4ED8;
+  --accent-ink: #FFFFFF;
+  --accent-hover: #1D4ED8;
+  --accent-active: #1E40AF;
+  --ok: #166534;
+  --warn: #92400E;
+  --bad: #B91C1C;
+  --chart-1: #2563EB;
+  --chart-2: #0D9488;
+  --chart-3: #D97706;
+  --chart-4: #7C3AED;
+  --chart-5: #E11D48;
+  --scrollbar-thumb: #C9D4E3;
+  --scrim: rgb(15 23 42 / 0.40);
+  /* chat: your message blue with white text, replies white on a blue edge */
+  --chat-user-bg: #2563EB;
+  --chat-user-fg: #FFFFFF;
+  --chat-reply-bg: #FFFFFF;
+  --chat-reply-edge: #BFDBFE;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-bg: #18181B;
+    --surface-paper: #1F1F23;
+    --surface-raised: #27272A;
+    --surface-sunk: #303036;
+    --rule: #2E2E33;
+    --rule-hard: #52525B;
+    --text-ink: #F4F4F5;
+    --text-muted: #D4D4D8;
+    --text-faint: #A1A1AA;
+    --accent: #60A5FA;
+    --accent-fg: #60A5FA;
+    --accent-ink: #0B1220;
+    --accent-hover: #93C5FD;
+    --accent-active: #3B82F6;
+    --ok: #4ADE80;
+    --warn: #FBBF24;
+    --bad: #F87171;
+    --chart-1: #60A5FA;
+    --chart-2: #2DD4BF;
+    --chart-3: #FBBF24;
+    --chart-4: #A78BFA;
+    --chart-5: #FB7185;
+    --scrollbar-thumb: #52525B;
+    --scrim: rgb(0 0 0 / 0.60);
+    --chat-user-bg: #2563EB;
+    --chat-user-fg: #FFFFFF;
+    --chat-reply-bg: #1F1F23;
+    --chat-reply-edge: #1E3A8A;
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-bg: #18181B;
+  --surface-paper: #1F1F23;
+  --surface-raised: #27272A;
+  --surface-sunk: #303036;
+  --rule: #2E2E33;
+  --rule-hard: #52525B;
+  --text-ink: #F4F4F5;
+  --text-muted: #D4D4D8;
+  --text-faint: #A1A1AA;
+  --accent: #60A5FA;
+  --accent-fg: #60A5FA;
+  --accent-ink: #0B1220;
+  --accent-hover: #93C5FD;
+  --accent-active: #3B82F6;
+  --ok: #4ADE80;
+  --warn: #FBBF24;
+  --bad: #F87171;
+  --chart-1: #60A5FA;
+  --chart-2: #2DD4BF;
+  --chart-3: #FBBF24;
+  --chart-4: #A78BFA;
+  --chart-5: #FB7185;
+  --scrollbar-thumb: #52525B;
+  --scrim: rgb(0 0 0 / 0.60);
+  --chat-user-bg: #2563EB;
+  --chat-user-fg: #FFFFFF;
+  --chat-reply-bg: #1F1F23;
+  --chat-reply-edge: #1E3A8A;
+}

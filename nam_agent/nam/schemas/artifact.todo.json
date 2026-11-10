@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "artifact.todo",
+  "description": "The case's to-do list (case.plan): the steps from the case's stage to the goal the query named, each with its status as the case shows it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "goal",
+    "items"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "goal": {
+      "type": "string",
+      "pattern": "^S([1-9]|10)$"
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "n",
+          "flow",
+          "title",
+          "stage",
+          "status",
+          "roles",
+          "why"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "flow": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "stage": {
+            "type": "string",
+            "pattern": "^S([1-9]|10)$"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "done",
+              "waiting_input",
+              "waiting_approval",
+              "blocked"
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "maxItems": 7,
+            "items": {
+              "type": "string",
+              "maxLength": 10
+            }
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    }
+  }
+}

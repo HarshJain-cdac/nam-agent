@@ -1,0 +1,191 @@
+{
+  "title": "documents artifact",
+  "description": "What docs.generate leaves (FRS F17-F25): each document's content, where its clauses came from, and the stored .docx; complete once every contract-specific field is given and no required document is empty.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "complete",
+    "documents"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "category": {
+      "enum": [
+        "goods",
+        "services",
+        "works"
+      ]
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 300
+      }
+    },
+    "documents": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "title",
+          "doc_id",
+          "version",
+          "required",
+          "metadata"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "doc_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          },
+          "version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "required_why": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "rows": {
+            "type": "array",
+            "maxItems": 2000,
+            "items": {
+              "type": "object"
+            }
+          },
+          "total": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "clauses": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text",
+                "source",
+                "class",
+                "basis",
+                "selected",
+                "why"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "source": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "class": {
+                  "enum": [
+                    "standard",
+                    "contract_specific",
+                    "unclassified"
+                  ]
+                },
+                "basis": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "selected": {
+                  "type": "boolean"
+                },
+                "why": {
+                  "type": "string",
+                  "maxLength": 300
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id",
+              "generated_at",
+              "by",
+              "sources",
+              "estimate_version",
+              "selection"
+            ],
+            "properties": {
+              "case_id": {
+                "type": "string"
+              },
+              "generated_at": {
+                "type": "string"
+              },
+              "by": {
+                "type": "string"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "estimate_version": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "selection": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "precedents": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

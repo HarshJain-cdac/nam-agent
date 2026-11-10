@@ -1,0 +1,86 @@
+{
+  "title": "handoff.nit result",
+  "description": "FRS F41, F43, F44: the structured handoff for NIT.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "package_version",
+    "handed_off",
+    "data",
+    "nit"
+  ],
+  "properties": {
+    "package_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "handed_off": {
+      "type": "boolean"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "category",
+        "items",
+        "documents",
+        "pr",
+        "approval"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 2000,
+          "items": {
+            "type": "object"
+          }
+        },
+        "documents": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "pattern": "^[a-z][a-z_]{1,40}$"
+              },
+              "doc_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 80
+              },
+              "version": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "pr": {
+          "type": "object"
+        },
+        "approval": {
+          "type": "object"
+        }
+      }
+    },
+    "nit": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

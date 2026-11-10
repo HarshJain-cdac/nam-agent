@@ -1,0 +1,80 @@
+{
+  "title": "quantity artifact",
+  "description": "What quantity.finalise leaves (FRS F10): the case's lines; complete once each has a quantity and a unit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "complete",
+    "lines"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "lines": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item",
+          "qty",
+          "uom",
+          "material_code",
+          "source"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "qty": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "uom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          },
+          "material_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "precedents": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      }
+    },
+    "scope": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "The scope of work from the guided form (F10)."
+    }
+  }
+}

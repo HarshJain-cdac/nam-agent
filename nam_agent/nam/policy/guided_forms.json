@@ -1,0 +1,344 @@
+{
+  "status": "DRAFT for review: drafted from FRS 3.1.1 (available information), entity E2, R28 and the need.guided_form instructions; Diagram B is an image and its exact fields are to be checked",
+  "fields": {
+    "codified": {
+      "label": "Is the item codified (has a material code)?",
+      "type": "radio",
+      "options": [
+        "Codified",
+        "Uncodified"
+      ],
+      "mandatory": true,
+      "subtype": true
+    },
+    "material_code": {
+      "label": "Material code",
+      "type": "text",
+      "mandatory_if": {
+        "field": "codified",
+        "equals": "Codified"
+      },
+      "na_if": {
+        "field": "codified",
+        "equals": "Uncodified"
+      }
+    },
+    "service_type": {
+      "label": "Which kind of service is it?",
+      "type": "radio",
+      "options": [
+        "Repetitive (AMC, manpower)",
+        "Consultancy",
+        "Non-consultancy"
+      ],
+      "mandatory": true,
+      "subtype": true
+    },
+    "service_code": {
+      "label": "Service code, if there is one",
+      "type": "text"
+    },
+    "budget": {
+      "label": "Is the budget Capital or Revenue?",
+      "type": "radio",
+      "options": [
+        "Capital",
+        "Revenue"
+      ],
+      "mandatory": true
+    },
+    "impanelment": {
+      "label": "Is the work within or outside the impanelment?",
+      "type": "radio",
+      "options": [
+        "Within impanelment",
+        "Outside impanelment"
+      ]
+    },
+    "description": {
+      "label": "Describe the item, service or work",
+      "type": "text",
+      "mandatory": true
+    },
+    "specification": {
+      "label": "Technical specification of the item",
+      "type": "text",
+      "mandatory_if": {
+        "field": "codified",
+        "equals": "Uncodified"
+      },
+      "na_if": {
+        "field": "codified",
+        "equals": "Codified"
+      }
+    },
+    "scope_of_work": {
+      "label": "Scope of work",
+      "type": "text",
+      "mandatory": true
+    },
+    "line_items": {
+      "label": "Line items with quantities, if you have them",
+      "type": "text"
+    },
+    "previous_contract": {
+      "label": "The previous contract or tender for this work, if known",
+      "type": "text"
+    },
+    "worker_categories": {
+      "label": "Worker categories (skilled, semi-skilled, unskilled)",
+      "type": "text",
+      "mandatory_if": {
+        "field": "service_type",
+        "equals": "Repetitive (AMC, manpower)"
+      }
+    },
+    "head_count": {
+      "label": "Number of workers",
+      "type": "number",
+      "mandatory_if": {
+        "field": "service_type",
+        "equals": "Repetitive (AMC, manpower)"
+      }
+    },
+    "quantity": {
+      "label": "Quantity",
+      "type": "number",
+      "mandatory": true,
+      "need": "quantity"
+    },
+    "uom": {
+      "label": "Unit of measure (Nos, Kg, Mtr, Set)",
+      "type": "text",
+      "mandatory": true
+    },
+    "term_months": {
+      "label": "Contract period in months",
+      "type": "number",
+      "mandatory": true,
+      "need": "term"
+    },
+    "required_by": {
+      "label": "Required-by date (YYYY-MM-DD)",
+      "type": "date",
+      "mandatory": true
+    },
+    "start_date": {
+      "label": "Start date (YYYY-MM-DD), if fixed",
+      "type": "date"
+    },
+    "location": {
+      "label": "Location (plant, unit or area)",
+      "type": "text",
+      "mandatory": true,
+      "need": "location"
+    },
+    "justification": {
+      "label": "Business justification",
+      "type": "text",
+      "mandatory": true
+    },
+    "purpose": {
+      "label": "Purpose, if different from the justification",
+      "type": "text"
+    }
+  },
+  "forms": {
+    "Goods": [
+      "codified",
+      "material_code",
+      "description",
+      "specification",
+      "quantity",
+      "uom",
+      "required_by",
+      "location",
+      "justification",
+      "purpose"
+    ],
+    "Services": [
+      "service_type",
+      "service_code",
+      "description",
+      "scope_of_work",
+      "worker_categories",
+      "head_count",
+      "term_months",
+      "start_date",
+      "location",
+      "justification",
+      "purpose"
+    ],
+    "New Works": [
+      "budget",
+      "impanelment",
+      "description",
+      "scope_of_work",
+      "line_items",
+      "required_by",
+      "location",
+      "justification",
+      "purpose"
+    ],
+    "Repetitive Works": [
+      "budget",
+      "impanelment",
+      "previous_contract",
+      "description",
+      "scope_of_work",
+      "line_items",
+      "term_months",
+      "start_date",
+      "location",
+      "justification",
+      "purpose"
+    ]
+  },
+  "capture": {
+    "about": "PR Creation Flow 1(c), 1(e): the details need capture asks after the questions that tell the past tenders apart, per form, in order. A field is a key or {key, text, per_item, options_from, options, options_in_days}: 'text' is the question ({item} is the item it is asked for); 'per_item' asks it for each item of a request with several, before the next item starts (the rest are asked once, for the whole need, at the end). Every question offers choices, never examples in its words: 'options_from' the values the matching past tenders carry (related.<field>, or past_quantities.qty / past_quantities.uom from the KG's price records), most common first; then 'options', this policy's own; 'options_in_days' dates that many days from today. The officer may still type their own value; 'I don't know' is always offered and takes the most common suggestion, marked default.",
+    "Goods": [
+      {
+        "key": "quantity",
+        "per_item": true,
+        "text": "How many {item} are needed?",
+        "options_from": "past_quantities.qty"
+      },
+      {
+        "key": "uom",
+        "per_item": true,
+        "text": "In which unit are {item} counted?",
+        "options_from": "past_quantities.uom",
+        "options": [
+          "Nos",
+          "Set",
+          "Kg",
+          "Mtr",
+          "Ltr",
+          "Lot"
+        ]
+      },
+      {
+        "key": "required_by",
+        "text": "By when are they needed?",
+        "options_in_days": [
+          30,
+          60,
+          90
+        ]
+      },
+      {
+        "key": "location",
+        "text": "Which plant, unit or area will they be used in?",
+        "options_from": "related.department"
+      },
+      {
+        "key": "purpose",
+        "text": "What will they be used for?",
+        "options": [
+          "Replacement of worn or failed items",
+          "Maintenance spares",
+          "New installation",
+          "Project requirement"
+        ]
+      }
+    ],
+    "Services": [
+      {
+        "key": "term_months",
+        "text": "For how many months is the contract?",
+        "options": [
+          "6",
+          "12",
+          "24",
+          "36"
+        ]
+      },
+      {
+        "key": "start_date",
+        "text": "From when should it start?",
+        "options_in_days": [
+          30,
+          60,
+          90
+        ]
+      },
+      {
+        "key": "location",
+        "text": "Which plant, unit or area will they be used in?",
+        "options_from": "related.department"
+      },
+      {
+        "key": "purpose",
+        "text": "What will they be used for?",
+        "options": [
+          "Replacement of worn or failed items",
+          "Maintenance spares",
+          "New installation",
+          "Project requirement"
+        ]
+      }
+    ],
+    "New Works": [
+      {
+        "key": "required_by",
+        "text": "By when are they needed?",
+        "options_in_days": [
+          30,
+          60,
+          90
+        ]
+      },
+      {
+        "key": "location",
+        "text": "Which plant, unit or area will they be used in?",
+        "options_from": "related.department"
+      },
+      {
+        "key": "purpose",
+        "text": "What will they be used for?",
+        "options": [
+          "Replacement of worn or failed items",
+          "Maintenance spares",
+          "New installation",
+          "Project requirement"
+        ]
+      }
+    ],
+    "Repetitive Works": [
+      {
+        "key": "term_months",
+        "text": "For how many months is the contract?",
+        "options": [
+          "6",
+          "12",
+          "24",
+          "36"
+        ]
+      },
+      {
+        "key": "start_date",
+        "text": "From when should it start?",
+        "options_in_days": [
+          30,
+          60,
+          90
+        ]
+      },
+      {
+        "key": "location",
+        "text": "Which plant, unit or area will they be used in?",
+        "options_from": "related.department"
+      },
+      {
+        "key": "purpose",
+        "text": "What will they be used for?",
+        "options": [
+          "Replacement of worn or failed items",
+          "Maintenance spares",
+          "New installation",
+          "Project requirement"
+        ]
+      }
+    ]
+  }
+}

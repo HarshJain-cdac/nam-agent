@@ -1,0 +1,293 @@
+{
+  "title": "NAM run response (nam.v1)",
+  "description": "Every successful POST /v1/nam/run reply. 'result' is checked separately against the flow's own schema.",
+  "type": "object",
+  "required": [
+    "version",
+    "run_id",
+    "case_id",
+    "case_version",
+    "flow",
+    "frs",
+    "stage",
+    "status",
+    "result",
+    "questions",
+    "pending_action",
+    "citations",
+    "warnings",
+    "next",
+    "route",
+    "verification"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "nam.v1"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run_[a-f0-9]{16}$"
+    },
+    "case_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^NAM-\\d{4}-\\d{4,8}$"
+    },
+    "case_version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "description": "The case's version after this call; send it back as case_version."
+    },
+    "flow": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z_]+)*$"
+    },
+    "frs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^F\\d{1,2}$"
+      }
+    },
+    "stage": {
+      "type": "string",
+      "pattern": "^S\\d{1,2}$"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "needs_input",
+        "needs_approval",
+        "refused",
+        "error"
+      ]
+    },
+    "result": {
+      "type": "object"
+    },
+    "questions": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    },
+    "pending_action": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "id",
+        "kind",
+        "summary",
+        "allowed_roles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^act_[a-z0-9]{4,32}$"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "allowed_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "ref",
+          "authority"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "authority": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "next": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "by",
+        "why"
+      ],
+      "additionalProperties": false,
+      "description": "How the router chose the flow (nam_agent/nam/router.py); by 'none' when no flow ran.",
+      "properties": {
+        "by": {
+          "enum": [
+            "answer",
+            "explicit",
+            "resume",
+            "intent",
+            "stage",
+            "category",
+            "continue",
+            "message",
+            "model",
+            "none",
+            "words",
+            "need"
+          ]
+        },
+        "why": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "verification": {
+      "description": "The feedback loop's result (nam_agent/nam/verify.py): what was checked against the case as stored after the step, and what the case's stage still needs. A step that said ok but failed a check is reported as needs_input.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "checks",
+        "stage_needs"
+      ],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "checks": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "ok",
+              "says"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "says": {
+                "type": "string",
+                "maxLength": 300
+              }
+            }
+          }
+        },
+        "stage_needs": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": [
+        "id",
+        "text",
+        "options"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "why": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "source": {
+          "enum": [
+            "model",
+            "tenders",
+            "harness"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Empty means a free-text answer.",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "narrows": {
+          "type": "boolean",
+          "description": "False for a question whose answer does not narrow the past tenders (the category, a detail)."
+        }
+      }
+    }
+  }
+}

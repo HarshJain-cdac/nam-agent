@@ -1,0 +1,43 @@
+{
+  "title": "shortlist artifact",
+  "description": "Every tender precedent.search showed for the case (FRS F6, F7).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query",
+    "mode",
+    "last",
+    "shown",
+    "searches"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "mode": {
+      "enum": [
+        "lexical",
+        "similar"
+      ]
+    },
+    "last": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string"
+      }
+    },
+    "shown": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "string"
+      }
+    },
+    "searches": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

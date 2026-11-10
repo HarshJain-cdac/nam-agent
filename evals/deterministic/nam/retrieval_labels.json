@@ -1,0 +1,5 @@
+{
+  "about": "Labelled queries for the retrieval metric (plan Step 13): each query is a short subject phrasing of one past NRL tender, and case_key is that tender. Built by scripts/nam_retrieval_labels.py from the live KG; empty until it is run while the KG's graph is reachable (on 2026-10-03 the KG API answered but its NebulaGraph host did not).",
+  "built": null,
+  "labels": []
+}

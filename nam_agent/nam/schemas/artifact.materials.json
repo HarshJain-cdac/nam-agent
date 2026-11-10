@@ -1,0 +1,65 @@
+{
+  "title": "materials artifact",
+  "description": "What material.suggest leaves (FRS F11): the suggestions and what the officer picked.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "query",
+    "refine",
+    "suggestions"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "query": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "refine": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "maxLength": 120
+      }
+    },
+    "suggestions": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item",
+          "source",
+          "spec",
+          "picked"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "spec": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "picked": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

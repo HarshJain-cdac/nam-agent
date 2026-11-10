@@ -1,0 +1,137 @@
+{
+  "title": "NAM case documents (nam.v1)",
+  "description": "GET /v1/nam/cases/{id}/documents: the case's documents that are not deleted, oldest first.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "case_id",
+    "documents"
+  ],
+  "properties": {
+    "version": {
+      "const": "nam.v1"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^NAM-\\d{4}-\\d{4,8}$"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/summary"
+      }
+    }
+  },
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "doc_id",
+        "case_id",
+        "kind",
+        "doc_version",
+        "latest_version",
+        "filename",
+        "mime",
+        "bytes",
+        "sha256",
+        "pages",
+        "text_pages",
+        "ocr_pages",
+        "uploaded_by",
+        "uploaded_at",
+        "deleted"
+      ],
+      "properties": {
+        "doc_id": {
+          "type": "string",
+          "pattern": "^DOC-[0-9a-f]{12}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^NAM-\\d{4}-\\d{4,8}$"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,39}$"
+        },
+        "doc_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "latest_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "filename": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "mime": {
+          "enum": [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "image/png",
+            "image/jpeg",
+            "image/tiff"
+          ]
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text_pages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ocr_pages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uploaded_by": {
+          "type": "string"
+        },
+        "uploaded_at": {
+          "type": "string"
+        },
+        "deleted": {
+          "$ref": "#/$defs/deleted"
+        }
+      }
+    },
+    "deleted": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "at",
+        "by",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "by": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

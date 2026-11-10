@@ -1,0 +1,132 @@
+{
+  "title": "uploads artifact",
+  "description": "What document.update leaves (FRS F39): the edits that came back, their accuracy, and what is awaited.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "awaiting",
+    "awaited",
+    "expected",
+    "updates",
+    "added"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "awaiting": {
+      "type": "boolean"
+    },
+    "awaited": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      }
+    },
+    "expected": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "since_version"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "since_version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "updates": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "doc_id",
+          "from_version",
+          "to_version",
+          "accuracy_pct",
+          "rework_pct"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "doc_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "from_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accuracy_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "rework_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "added": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "doc_id",
+          "version",
+          "filename"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "doc_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    }
+  }
+}

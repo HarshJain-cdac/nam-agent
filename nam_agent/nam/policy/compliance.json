@@ -1,0 +1,30 @@
+{
+  "status": "DRAFT for review: the compliance requirements NAM proposes (FRS F26), from the public procurement orders as generally applied in Indian PSU tenders; the user department confirms each one per case, and NRL confirms this list before production use",
+  "requirements": [
+    {"id": "mse_preference", "categories": ["goods", "services"],
+     "text": "Purchase preference to Micro and Small Enterprises: an MSE quoting within L1 + 15% may supply part of the quantity by matching L1, as the Public Procurement Policy for MSEs allows.",
+     "basis": "Public Procurement Policy for MSEs Order, 2012",
+     "kg": {"section": "mse", "words": ["micro and small", "mse"]}},
+    {"id": "mse_emd_exemption", "categories": ["goods", "services", "works"],
+     "text": "MSEs registered for the item or service are exempt from paying the EMD (bid security).",
+     "basis": "Public Procurement Policy for MSEs Order, 2012",
+     "kg": {"section": "mse", "words": ["exempt"]}},
+    {"id": "make_in_india", "categories": ["goods", "services", "works"],
+     "text": "Purchase preference to Class-I local suppliers under the Public Procurement (Preference to Make in India) Order; the local content each class needs is as that order sets.",
+     "basis": "Public Procurement (Preference to Make in India) Order, 2017",
+     "kg": {"section": "ppl_c", "words": ["make in india", "local content", "class-i", "class i"]}},
+    {"id": "oem_authorisation", "categories": ["goods"],
+     "text": "A bidder who is not the OEM submits the OEM's authorisation for the offered items.",
+     "basis": "department practice"},
+    {"id": "startup_relaxation", "categories": ["goods", "services"],
+     "text": "Prior experience and turnover criteria are relaxed for recognised startups that meet the quality and technical specification.",
+     "basis": "Department of Expenditure guidance on startups",
+     "kg": {"section": "ptr_relaxation", "words": ["startup", "start-up", "start up"]}},
+    {"id": "technical_compliance", "categories": ["goods", "works"],
+     "text": "The bidder submits a clause-by-clause compliance statement against the technical specification.",
+     "basis": "department practice"},
+    {"id": "labour_laws", "categories": ["services", "works"],
+     "text": "The contractor complies with the Contract Labour Act, the minimum wages, PF and ESI for every worker deployed.",
+     "basis": "Contract Labour (Regulation and Abolition) Act, 1970"}
+  ]
+}

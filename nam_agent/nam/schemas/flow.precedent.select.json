@@ -1,0 +1,84 @@
+{
+  "title": "precedent.select result",
+  "description": "FRS F7: the precedent the officer selected and what each tender carries, or why a named tender was refused.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "selected",
+    "previous",
+    "refused"
+  ],
+  "properties": {
+    "selected": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_key",
+          "tender_no",
+          "subject",
+          "counts",
+          "complete"
+        ],
+        "properties": {
+          "case_key": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "tender_no": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "previous": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "refused": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref",
+          "why"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "status": "REVIEWED 2026-10-01: thresholds, the 180-day open-PR window, the mandatory documents and the wage percentages confirmed by the user; a duplicate PR has no override; sunday_double (R39, x2 before the 15% CP) and rounding.reimbursement_step (R13, Rs 50,000) added 2026-10-01 from the FRS, to review",
+  "similarity": {
+    "similar_rate": 0.95
+  },
+  "rate_comparison": {
+    "varn_pct": 10,
+    "cagr_pct": 10,
+    "min_years": 1,
+    "decide": [
+      "AHR",
+      "manual_review"
+    ],
+    "decide_about": "PR Creation Flow 2(e): a line with one of these flags needs the officer's Accept or Revise before the estimate can be approved"
+  },
+  "duplicates": {
+    "pr_open_days": 180,
+    "need_overlap": 0.9
+  },
+  "mandatory_documents": {
+    "goods": [
+      "estimate",
+      "boq",
+      "specification",
+      "pqc",
+      "scc"
+    ],
+    "services": [
+      "estimate",
+      "boq",
+      "scope_of_work",
+      "pqc",
+      "scc"
+    ],
+    "works": [
+      "estimate",
+      "boq",
+      "sor",
+      "specification",
+      "pqc",
+      "scc"
+    ]
+  },
+  "precedent_flows": [
+    "need.capture",
+    "need.replicate",
+    "precedent.select",
+    "case.edit"
+  ],
+  "estimate_flows": {
+    "estimate.goods": [
+      "goods"
+    ],
+    "estimate.wage": [
+      "services",
+      "works"
+    ],
+    "estimate.works": [
+      "works"
+    ]
+  },
+  "percentages": {
+    "statutory": 13.13,
+    "non_statutory": [
+      35,
+      40.6
+    ],
+    "pf_edli": 13,
+    "esi": 4.75,
+    "wci": 2.79,
+    "ppe": 5,
+    "tools_tackles": 5,
+    "sunday_cp": 15,
+    "sunday_double": 100
+  },
+  "rounding": {
+    "reimbursement_step": 50000
+  },
+  "goods_price": {
+    "about": "PR Creation Flow 2(a)-(b): the last price paid for each goods line, in this order of price level (rate contract first once SAP is connected, then the PO, an NRL estimate only when no price was paid), brought up to the evaluation date at escalation_pct a year, compounded and rounded each year. The evaluation date is the estimate's eval_date (the BOQ upload date) when given, else today.",
+    "levels": [
+      [
+        "award",
+        "po"
+      ],
+      [
+        "invoice",
+        "po"
+      ],
+      [
+        "estimate",
+        "internal"
+      ]
+    ],
+    "escalation_pct": 7
+  }
+}

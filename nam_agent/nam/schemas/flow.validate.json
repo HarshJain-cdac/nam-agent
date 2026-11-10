@@ -1,0 +1,98 @@
+{
+  "title": "validate result",
+  "description": "FRS F30-F34, F46: the consolidated report and its status.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "summary",
+    "checks",
+    "failures",
+    "report"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "checks": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check",
+          "severity",
+          "doc",
+          "says"
+        ],
+        "properties": {
+          "check": {
+            "enum": [
+              "format",
+              "completeness",
+              "consistency",
+              "manual",
+              "integrity",
+              "versions",
+              "review"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "fail",
+              "warn",
+              "info"
+            ]
+          },
+          "doc": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "says": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "failures": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "report": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "doc_id",
+        "version"
+      ],
+      "properties": {
+        "doc_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

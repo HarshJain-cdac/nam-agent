@@ -1,0 +1,466 @@
+{
+  "title": "estimate result",
+  "description": "FRS F13-F16: every line's rate with its basis and source, the total, the New Items without a rate, and the officer's inputs. The lines are the estimate artifact's, before the guardrails add their alerts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "category",
+    "kind",
+    "complete",
+    "lines",
+    "total",
+    "new_items",
+    "inputs",
+    "settings",
+    "header"
+  ],
+  "properties": {
+    "category": {
+      "enum": [
+        "goods",
+        "services",
+        "works"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "goods",
+        "works",
+        "wage"
+      ]
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "False when an input the estimate needs is missing (a basic wage); nothing was saved."
+    },
+    "lines": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "$ref": "#/$defs/line"
+      }
+    },
+    "total": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "new_items": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "description": "The officer's input per item (the rates answer), kept for later runs.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "The officer's settings for the whole estimate (all: ...).",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 200
+      }
+    },
+    "header": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "cost_centre": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "description": "Where a number came from: a tool result of this run (tool, evidence, path), the officer's own words (officer, quote), or a rule applied to other components (rule, of, pct). Or an earlier line's quantity times its rate or one of its components (line, component), or a rounding up (rule round_up, of, step). Or the last price brought up to the evaluation date (rule escalation, base, base_value, pct, years).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "evidence": {
+          "type": "string",
+          "pattern": "^ev_[0-9]+$"
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "officer": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "quote": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "rule": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "of": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "pct": {
+          "type": "number"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "component": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "step": {
+          "type": "number",
+          "minimum": 1
+        },
+        "years": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "base": {
+          "$ref": "#/$defs/source"
+        },
+        "base_value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "from_year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_year": {
+          "type": "integer"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "amount",
+        "source"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "amount": {
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "base": {
+          "type": "boolean",
+          "description": "What a rule is a percentage of; not part of the rate."
+        }
+      }
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item",
+        "qty",
+        "rate",
+        "basis"
+      ],
+      "properties": {
+        "item": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "qty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "uom": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 40
+        },
+        "material_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 40
+        },
+        "rate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "basis": {
+          "enum": [
+            "same",
+            "similar",
+            "internal",
+            "derived",
+            "first_principle",
+            "wage",
+            "po",
+            "quotation",
+            "new_item"
+          ]
+        },
+        "schedule": {
+          "enum": [
+            "nrl_sor",
+            "dsr",
+            "dsr_em",
+            "dar",
+            "apwd_sor",
+            "sor_rr",
+            null
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "components": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/component"
+          }
+        },
+        "nrl_approved": {
+          "type": "boolean"
+        },
+        "match": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "score",
+            "threshold",
+            "basis"
+          ],
+          "properties": {
+            "score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 300
+            },
+            "final": {
+              "type": "boolean"
+            }
+          }
+        },
+        "comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "quoted",
+            "po_rate",
+            "years",
+            "flag"
+          ],
+          "properties": {
+            "quoted": {
+              "type": "number",
+              "minimum": 0
+            },
+            "po_rate": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "years": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "varn": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "cagr": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "flag": {
+              "enum": [
+                "ALR",
+                "AHR",
+                "Regular",
+                "manual_review",
+                "new_item"
+              ]
+            },
+            "final": {
+              "type": "boolean"
+            }
+          }
+        },
+        "last_price": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rate",
+            "year",
+            "level"
+          ],
+          "properties": {
+            "rate": {
+              "type": "number",
+              "minimum": 0
+            },
+            "year": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "level": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "n": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "by"
+          ],
+          "properties": {
+            "value": {
+              "enum": [
+                "accept",
+                "revise"
+              ]
+            },
+            "by": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "rate": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "says"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "dsr_fallback",
+            "not_nrl_approved",
+            "last_resort",
+            "new_item",
+            "manual_review",
+            "high_rate"
+          ]
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "says": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    }
+  }
+}

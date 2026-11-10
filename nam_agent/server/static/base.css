@@ -1,0 +1,110 @@
+/* The dashboard's base layer: its fonts, sizes, spacing, type and motion.
+   Colours are theme.css's; the screen itself is style.css's. The order in
+   index.html is base.css, theme.css, style.css.
+
+   The fonts are under the SIL Open Font License 1.1 (fonts/OFL-*.txt). */
+
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/static/fonts/InstrumentSans-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/static/fonts/JetBrainsMono-var.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display SC";
+  src: url("/static/fonts/PlayfairDisplaySC-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  /* type */
+  --face-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --face-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --face-display: "Playfair Display SC", Georgia, serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 550;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --tracking-label: 0.06em;
+  --measure-narrow: 60ch;
+
+  /* space: a 4px step */
+  --spacing: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* controls */
+  --control-gap: 0.5rem;
+  --control-pad-x: 0.875rem;
+  --control-pad-y: 0.4375rem;
+  --rule-width: 1px;
+  --input: var(--rule-hard);       /* a field's border: theme.css's colour */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* shape */
+  --radius: 0.5rem;
+  --shape-chip: 999px;
+  --shape-bubble: 1rem;
+  --shape-card: 0.75rem;           /* a NAM card (style.css .nc) */
+  --shape-circle: 50%;
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 0.12);
+  --scrim-blur: 4px;
+
+  /* layout */
+  --page: 880px;
+  --rail-w: 15rem;
+  --dock-w: 26rem;
+  --main-min: 22rem;
+  --dialog-wide: 44rem;
+
+  /* stacking */
+  --z-inside: 1;
+  --z-menu: 50;
+  --z-dialog: 100;
+
+  /* motion */
+  --motion-fast: 140ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--face-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: var(--font-weight-normal);
+}
+
+code, pre, kbd { font-family: var(--face-mono); }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

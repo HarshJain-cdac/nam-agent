@@ -1,0 +1,48 @@
+{
+  "title": "pr.submit result",
+  "description": "FRS F28, F29: whether the PR is submitted, its Procurix.ai PR number, and the SAP PR number once recorded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "submitted",
+    "pr_number",
+    "sap_pr",
+    "items",
+    "sap",
+    "sap_status"
+  ],
+  "properties": {
+    "submitted": {
+      "type": "boolean"
+    },
+    "pr_number": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 40
+    },
+    "sap_pr": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{8,12}$"
+    },
+    "items": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sap": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "sap_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    }
+  }
+}

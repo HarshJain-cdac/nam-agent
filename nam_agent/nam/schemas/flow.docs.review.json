@@ -1,0 +1,88 @@
+{
+  "title": "docs.review result",
+  "description": "FRS F24: the findings, numbered for the drafter's answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "open",
+    "documents_version"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "n",
+          "kind",
+          "severity",
+          "refs",
+          "says",
+          "source",
+          "accepted",
+          "why"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "enum": [
+              "conflict",
+              "vague",
+              "unclassified",
+              "model",
+              "pqc_threshold",
+              "incomplete_term",
+              "brand"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "fail",
+              "warn",
+              "info"
+            ]
+          },
+          "refs": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "says": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "source": {
+            "enum": [
+              "harness",
+              "model"
+            ]
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "why": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "open": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "documents_version": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "title": "approval result",
+  "description": "FRS F37, F38, F45: the approval file and its authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "file_number",
+    "aarohan_file",
+    "authority",
+    "authority_basis",
+    "complete",
+    "ann",
+    "approved",
+    "aarohan"
+  ],
+  "properties": {
+    "file_number": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "aarohan_file": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    },
+    "authority": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "authority_basis": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "ann": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "doc_id",
+        "version"
+      ],
+      "properties": {
+        "doc_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    },
+    "approved": {
+      "type": "boolean"
+    },
+    "aarohan": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

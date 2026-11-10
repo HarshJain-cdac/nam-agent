@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# secrets: settings and keys live in .env, never in git
+.env
+.env.*
+!.env.example
+*token*.json
+credentials.json
+client_secret*.json
+.gcp/
+
+# runtime data: state.db, the cases, traces (NAM_HOME), and any other home
+.nam/
+.nam-*/
+.nam.bak-*/
+state.db
+traces/
+
+# logs
+*.log
+nohup.out
+
+.DS_Store

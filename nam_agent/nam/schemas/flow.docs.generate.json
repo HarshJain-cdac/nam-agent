@@ -1,0 +1,148 @@
+{
+  "title": "docs.generate result",
+  "description": "FRS F17-F25: each document's summary with its clauses numbered for editing, the fields still missing, and the past awardees to ask for a quotation for each New Item.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "category",
+    "complete",
+    "missing_fields",
+    "documents",
+    "vendors_to_ask"
+  ],
+  "properties": {
+    "category": {
+      "enum": [
+        "goods",
+        "services",
+        "works"
+      ]
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "missing_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "documents": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "title",
+          "doc_id",
+          "version",
+          "required",
+          "lines",
+          "clauses",
+          "selection"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "doc_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "lines": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "clauses": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "n",
+                "text",
+                "source",
+                "class",
+                "selected"
+              ],
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "source": {
+                  "type": "string"
+                },
+                "class": {
+                  "enum": [
+                    "standard",
+                    "contract_specific",
+                    "unclassified"
+                  ]
+                },
+                "selected": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "selection": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "vendors_to_ask": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "line",
+          "item",
+          "past_awardees"
+        ],
+        "properties": {
+          "line": {
+            "type": "integer"
+          },
+          "item": {
+            "type": "string"
+          },
+          "past_awardees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "flow.case.ask",
+  "description": "case.ask's answer: put together in code from the record and the KG, each fact with its source and authority; nothing is written.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "answer",
+    "topic",
+    "facts",
+    "suggested"
+  ],
+  "properties": {
+    "answer": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "topic": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "says",
+          "source",
+          "authority"
+        ],
+        "properties": {
+          "says": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "authority": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    "suggested": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+[project]
+name = "nam-agent"
+# the one version number is nam_agent/__init__.py
+dynamic = ["version"]
+description = "The agentic harness for NRL's Need Assessment Module: a need, understood item by item on SAP's records, to a Purchase Request."
+readme = "README.md"
+# Code is MIT; the bundled fonts are SIL OFL 1.1.
+license = "MIT AND OFL-1.1"
+license-files = ["LICENSE", "nam_agent/server/static/fonts/OFL-*.txt"]
+authors = [{ name = "HarshJain-cdac" }]
+requires-python = ">=3.11"
+keywords = ["procurement", "agent", "llm", "nam"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "anthropic>=0.40",   # anthropic wire format
+    "openai>=1.50",      # openai wire format (vLLM, gpt-oss and other OpenAI-compatible servers)
+    "python-dotenv>=1.0",
+    # NAM's documents: the PR / estimate .xlsx, the .docx exports, and the
+    # PDF / Word files an officer uploads
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    "pypdf>=4.0",
+]
+
+[project.urls]
+Repository = "https://github.com/HarshJain-cdac/nam-agent"
+
+[project.scripts]
+# `nam-agent serve`: the server on :7777
+nam-agent = "nam_agent.__main__:main"
+
+[project.optional-dependencies]
+# OpenTelemetry spans (traces always land in .nam/traces/*.jsonl)
+tracing = [
+    "opentelemetry-sdk>=1.27",
+    "opentelemetry-exporter-otlp>=1.27",
+]
+dev = [
+    "pytest>=8.0",
+    # pinned exactly, so a ruff release cannot turn the checks red by itself
+    "ruff==0.16.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "nam_agent/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github", ".nam"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nam_agent"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# Rules nam-agent IGNORES on purpose — each is a deliberate style choice, not an
+# oversight. If you're tempted to remove one, read the reason first:
+ignore = [
+    "BLE001",  # blind `except Exception` is the documented pattern: tools and
+               # observers surface errors as text instead of crashing the loop
+    "DTZ001", "DTZ005", "DTZ011",  # naive local datetimes are intentional —
+               # daily trace files and workspace folders are named in the
+               # user's local day, not UTC
+    "S110",    # try/except/pass around optional integrations (OTel, extras)
+    # RUF100 flags a `# noqa` for a rule that is no longer enabled. Because the
+    # rules above are globally ignored, ANY `# noqa: BLE001` a contributor
+    # writes — the natural, correct-looking thing to write next to a broad
+    # `except Exception` — becomes a CI failure in a file they never touched.
+    # That footgun blocked two community PRs (#14, #26) on 2026-07-26. Turning
+    # RUF100 off costs us the ability to spot genuinely stale noqas; leaving it
+    # on costs contributors a red CI they can't explain. Contributors win.
+    "RUF100",
+]

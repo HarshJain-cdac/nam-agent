@@ -1,0 +1,34 @@
+{
+  "title": "pr_reference artifact",
+  "description": "The SAP PR number the officer recorded for the submitted PR (FRS F29).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pr_number",
+    "sap_pr",
+    "by",
+    "at"
+  ],
+  "properties": {
+    "pr_number": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "sap_pr": {
+      "type": "string",
+      "pattern": "^\\d{8,12}$"
+    },
+    "by": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "at": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "sap_status": {
+      "type": "string",
+      "maxLength": 60
+    }
+  }
+}

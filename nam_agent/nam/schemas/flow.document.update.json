@@ -1,0 +1,102 @@
+{
+  "title": "document.update result",
+  "description": "FRS F39: the edits that came back and what is awaited.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "updates",
+    "added",
+    "awaiting",
+    "kept"
+  ],
+  "properties": {
+    "updates": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "doc_id",
+          "from_version",
+          "to_version",
+          "accuracy_pct",
+          "rework_pct"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "doc_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "from_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accuracy_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "rework_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "added": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "doc_id",
+          "version",
+          "filename"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "doc_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "awaiting": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      }
+    },
+    "kept": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

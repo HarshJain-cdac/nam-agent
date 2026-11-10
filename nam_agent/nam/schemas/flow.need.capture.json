@@ -1,0 +1,76 @@
+{
+  "title": "need.capture result",
+  "description": "FRS F1, F3, F4, F5, F49: the need, its classification, and every related past tender in the KG.",
+  "type": "object",
+  "required": ["requirement", "item", "classification", "ask_about", "readiness", "related",
+               "incidental", "followups", "dossier"],
+  "additionalProperties": false,
+  "properties": {
+    "requirement": {"type": "string"},
+    "item": {"type": "string"},
+    "classification": {
+      "type": "object",
+      "required": ["category", "subtype", "procurement_type", "tender_type"],
+      "additionalProperties": false,
+      "properties": {
+        "category": {"$ref": "#/$defs/prediction"},
+        "subtype": {"$ref": "#/$defs/prediction"},
+        "procurement_type": {"$ref": "#/$defs/prediction"},
+        "tender_type": {"$ref": "#/$defs/prediction"},
+        "location": {"type": "string"},
+        "term": {"type": "string"},
+        "quantity": {"type": "string"}
+      }
+    },
+    "ask_about": {"type": "array",
+                  "items": {"enum": ["category", "procurement_type", "tender_type"]}},
+    "readiness": {
+      "type": "object", "required": ["ready", "material_cases", "reason"],
+      "properties": {
+        "ready": {"type": "boolean"},
+        "material_cases": {"type": "array", "items": {"type": "string"}},
+        "reason": {"type": "string"},
+        "ask": {"type": "string"}
+      }
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["case_key", "tier"],
+        "properties": {
+          "case_key": {"type": "string"},
+          "tender_no": {"type": ["string", "null"]},
+          "subject": {"type": "string"},
+          "tier": {"enum": ["exact items", "direct", "line items"]},
+          "why": {"type": "string"}
+        }
+      }
+    },
+    "incidental": {"type": "array", "items": {"type": "string"}},
+    "semantic": {"type": ["object", "null"]},
+    "tenders_in_graph": {"type": ["integer", "null"]},
+    "followups": {
+      "type": "object", "required": ["asked", "done", "trail", "total_related", "narrowed_to"],
+      "properties": {
+        "asked": {"type": "integer", "minimum": 0},
+        "done": {"type": "boolean"},
+        "trail": {"type": "array", "items": {"type": "object"}},
+        "total_related": {"type": "integer", "minimum": 0},
+        "narrowed_to": {"type": "integer", "minimum": 0},
+        "stopped": {"type": "string"}
+      }
+    },
+    "dossier": {"type": "string"}
+  },
+  "$defs": {
+    "prediction": {
+      "type": "object", "required": ["value", "basis", "confident"],
+      "properties": {
+        "value": {"type": ["string", "null"]},
+        "basis": {"type": "string"},
+        "confident": {"type": "boolean"},
+        "id": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

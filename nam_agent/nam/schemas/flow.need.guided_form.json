@@ -1,0 +1,44 @@
+{
+  "title": "need.guided_form result",
+  "description": "FRS F8: the guided form for the case's category, its answers so far and what is still missing. The same value is the case's guided_form artifact.",
+  "type": "object",
+  "required": [
+    "form",
+    "answers",
+    "missing",
+    "complete"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "form": {
+      "enum": [
+        "Goods",
+        "Services",
+        "New Works",
+        "Repetitive Works",
+        null
+      ],
+      "description": "The F8 form, null while the category (or for Works New or Repetitive) is not picked."
+    },
+    "answers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "description": "Field key to the officer's answer; NA for a field skipped or ruled out."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      },
+      "description": "The mandatory fields with no answer yet."
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "True when every field is settled: S1 counts the need as captured and S2 takes it in place of a precedent."
+    }
+  }
+}

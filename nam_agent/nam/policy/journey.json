@@ -1,0 +1,256 @@
+{
+  "status": "DRAFT for review: drafted from 'PR Creation Flow in NAM_final_version.docx' (How a Purchase Request is Created in NAM for Goods); correct it with the business owner before production use",
+  "about": "The officer's journey as the PR Creation Flow describes it, laid over the harness's own stages (orchestrator.STAGES). nam_agent/nam/journey.py reads it; nothing here decides anything. A step is done when every condition in done_when holds on the case. Conditions: record:<path> (a Need Record field is set), artifact:<name>[.<path>] (a flow left it), check:<name> (an orchestrator check passes), gate:<name> (the approval is given), action:<name> (the action is confirmed), flagged:<artifact> (a line of it carries one of the flags below); a leading ! means the opposite, and a list inside done_when holds when any one of its conditions holds. A step with no done_when is a behaviour of its stage, not a separate milestone.",
+  "phases": [
+    {
+      "id": "need",
+      "name": "Need Identification",
+      "says": "The user chats with NAM to make clear what they need and to choose the exact items.",
+      "stages": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "steps": [
+        {
+          "id": "1a",
+          "stage": "S1",
+          "name": "The category",
+          "says": "NAM asks whether the need is goods, services or works.",
+          "user": "the category: goods, services or works",
+          "nam": "the category",
+          "done_when": [
+            "record:category.value"
+          ]
+        },
+        {
+          "id": "1b",
+          "stage": "S1",
+          "name": "The need in the user's words",
+          "says": "The user types the need in the NAM chat in their own words.",
+          "user": "the need, in their own words",
+          "nam": "the request as NAM read it",
+          "done_when": [
+            "record:raw_text"
+          ]
+        },
+        {
+          "id": "1c",
+          "stage": "S1",
+          "name": "Several items split",
+          "says": "A request with several items is split, and each item becomes its own search terms.",
+          "user": "",
+          "nam": "the items and their search terms",
+          "done_when": [
+            "record:followups.scan.terms"
+          ]
+        },
+        {
+          "id": "1d",
+          "stage": "S1",
+          "name": "Past purchases searched",
+          "says": "NAM searches the Knowledge Graph by meaning and by keyword for past purchase lines that match.",
+          "user": "",
+          "nam": "the similar past tenders and lines, with their source",
+          "done_when": [
+            "record:related_cases"
+          ]
+        },
+        {
+          "id": "1e",
+          "stage": "S1",
+          "name": "The missing details found",
+          "says": "NAM checks what is still needed to describe the item fully: size or range, material, standard, rating, certificate, quantity, date needed, location, use.",
+          "user": "",
+          "nam": "the follow-up questions, built from the past lines and NRL's specifications",
+          "done_when": [
+            "record:followups.scan"
+          ]
+        },
+        {
+          "id": "1f",
+          "stage": "S1",
+          "name": "Follow-up questions answered",
+          "says": "The user clicks an option or types an answer; NAM matches it to the closest option and repeats back what it understood. An answer that does not fit gets one short clarifying question.",
+          "user": "an answer to each follow-up question, in everyday words",
+          "nam": "the answer matched to an option, or one clarifying question",
+          "done_when": [
+            "record:followups.scan",
+            "!record:followups.pending"
+          ]
+        },
+        {
+          "id": "1g",
+          "stage": "S1",
+          "name": "NRL's standard value when the user does not know",
+          "says": "If the user does not know a required detail, NAM uses NRL's standard value and marks it default, so a reviewer can see it did not come from the user.",
+          "user": "\"I don't know\" is a valid answer",
+          "nam": "the value marked default"
+        },
+        {
+          "id": "1h",
+          "stage": "S1",
+          "name": "The item description is complete",
+          "says": "NAM stops asking once every required detail is captured and the category, procurement type and tender type are confirmed.",
+          "user": "confirmation of the category, procurement type and tender type",
+          "nam": "the completed requirement per item",
+          "done_when": [
+            "check:need",
+            "check:classification"
+          ]
+        },
+        {
+          "id": "1i",
+          "stage": "S2",
+          "name": "The matching past tenders",
+          "says": "NAM shows the past tenders that hold the matching items, latest first: ordered and delivered, then ordered and not yet delivered, then raised and cancelled.",
+          "user": "",
+          "nam": "the ranked list of matching tenders",
+          "done_when": [
+            "record:related_cases"
+          ]
+        },
+        {
+          "id": "1j",
+          "stage": "S2",
+          "name": "The items picked",
+          "says": "The user looks at each tender's items and picks the ones needed; they become the estimate lines, one per item.",
+          "user": "the tender (precedent) and the items to take from it",
+          "nam": "the picked items, grouped into estimate lines",
+          "done_when": [
+            "check:precedent"
+          ]
+        },
+        {
+          "id": "1k",
+          "stage": "S3",
+          "name": "The quantities finalised",
+          "says": "Every line gets its quantity and unit, and the officer approves the quantities.",
+          "user": "the quantity and unit of each line, then the quantity approval",
+          "nam": "the quantity sheet",
+          "done_when": [
+            "check:quantity",
+            "gate:quantity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "estimate",
+      "name": "Estimate creation",
+      "says": "From the chosen items NAM works out the expected cost from the most recent purchase of those items, brought up to today.",
+      "stages": [
+        "S4"
+      ],
+      "steps": [
+        {
+          "id": "2a",
+          "stage": "S4",
+          "name": "The last price found",
+          "says": "For each line NAM finds the last price paid, rate contract first, then PO; same code first, then an equivalent code; and records where it came from.",
+          "user": "",
+          "nam": "the last price of each line, with its source",
+          "done_when": [
+            "artifact:estimate"
+          ]
+        },
+        {
+          "id": "2b",
+          "stage": "S4",
+          "name": "The price brought up to today",
+          "says": "NAM brings the last price up to the evaluation date at the yearly escalation in the policy, counting whole years.",
+          "user": "",
+          "nam": "the estimated rate of each line",
+          "done_when": [
+            "artifact:estimate"
+          ]
+        },
+        {
+          "id": "2c",
+          "stage": "S4",
+          "name": "The estimate filled in",
+          "says": "NAM fills the estimate sheet; the user can change the quantity or the rate of any line. A line with no past price (a new item) needs its rate from the user.",
+          "user": "the rate of any line with no past price, and any quantity or rate change",
+          "nam": "the estimate table: code, description, unit, quantity, rate, amount, price source",
+          "done_when": [
+            "check:estimate",
+            "check:estimate_current",
+            "check:estimate_priced"
+          ]
+        },
+        {
+          "id": "2d",
+          "stage": "S4",
+          "name": "Each rate checked",
+          "says": "NAM compares each rate with the last price and gives each line a result. A flag is a warning only; NAM does not change the price by itself.",
+          "user": "",
+          "nam": "the result of each line",
+          "done_when": [
+            "artifact:estimate"
+          ]
+        },
+        {
+          "id": "2e",
+          "stage": "S4",
+          "name": "The flagged lines decided",
+          "says": "Every flagged line is accepted or revised by the user; the estimate cannot be locked until each has a decision. A line with no flag needs no decision.",
+          "user": "accept or revise each flagged line",
+          "nam": "the decision log of the flagged lines",
+          "done_when": [
+            "artifact:estimate",
+            "check:estimate_decided"
+          ]
+        },
+        {
+          "id": "2f",
+          "stage": "S4",
+          "name": "The estimate locked",
+          "says": "The user checks the quantities and locks the estimate; the locked rate becomes the PR's valuation price.",
+          "user": "the estimate approval",
+          "nam": "the locked estimate and its basis per line",
+          "done_when": [
+            "gate:estimate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pr",
+      "name": "PR Creation",
+      "says": "NAM uses everything gathered before to fill the Purchase Request and send it to SAP.",
+      "stages": [
+        "S7"
+      ],
+      "steps": [
+        {
+          "id": "3a",
+          "stage": "S7",
+          "name": "The PR filled in",
+          "says": "NAM fills each PR field from the earlier stages and records where each value came from.",
+          "user": "the PR fields only the user knows: delivery date, plant, storage location and any other field still empty",
+          "nam": "the filled PR, with the source of each field",
+          "done_when": [
+            "artifact:pr",
+            "check:pr"
+          ]
+        },
+        {
+          "id": "3b",
+          "stage": "S7",
+          "name": "The PR sent to SAP",
+          "says": "NAM checks every mandatory field, shows the PR to confirm, then posts it to SAP; SAP's PR number is linked to the need.",
+          "user": "confirmation of the PR",
+          "nam": "the SAP PR number, linked to the need",
+          "done_when": [
+            "action:submit_pr"
+          ]
+        }
+      ]
+    }
+  ],
+  "flags": {
+    "AHR": "the rate rose more than the yearly limit since the last price",
+    "manual_review": "the rate rose by the limit or more and the last price is less than a year old",
+    "new_item": "no past price was found"
+  }
+}

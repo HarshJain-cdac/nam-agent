@@ -1,0 +1,37 @@
+{
+  "title": "NAM Need Record (nam.v1)",
+  "description": "GET /v1/nam/cases/{id}: the case's current record, or with ?version=n the record as it was at that version. 'need' is the record itself; its fields grow as later flows are added.",
+  "type": "object",
+  "required": ["version", "case_id", "tenant", "case_version", "latest_version", "stage", "need",
+               "open_question", "pending_action", "gates", "actions", "missing", "created", "updated"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": "nam.v1"},
+    "case_id": {"type": "string", "pattern": "^NAM-\\d{4}-\\d{4,8}$"},
+    "tenant": {"type": "string", "minLength": 1},
+    "case_version": {"type": "integer", "minimum": 1,
+                     "description": "The version shown. Send it back as case_version to refuse a stale write."},
+    "latest_version": {"type": "integer", "minimum": 1},
+    "stage": {"type": "string", "pattern": "^S\\d{1,2}$"},
+    "need": {"type": "object", "required": ["need_id", "raw_text", "stage"]},
+    "open_question": {
+      "type": ["object", "null"], "required": ["id", "text"], "additionalProperties": false,
+      "properties": {"id": {"type": "string"}, "text": {"type": "string"}}
+    },
+    "pending_action": {"type": ["object", "null"],
+                       "description": "The approval or irreversible action awaiting confirmation."},
+    "gates": {"type": "array", "items": {"type": "string"}, "description": "Approvals given."},
+    "actions": {"type": "array", "items": {"type": "string"},
+                "description": "Irreversible actions done."},
+    "missing": {"type": "array", "items": {"type": "string"},
+                "description": "What the case's stage still needs before it can move on."},
+    "created": {"$ref": "#/$defs/stamp"},
+    "updated": {"$ref": "#/$defs/stamp"}
+  },
+  "$defs": {
+    "stamp": {
+      "type": "object", "required": ["at", "by"], "additionalProperties": false,
+      "properties": {"at": {"type": "string"}, "by": {"type": "string"}}
+    }
+  }
+}

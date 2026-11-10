@@ -1,0 +1,66 @@
+{
+  "title": "need.enrich result",
+  "description": "FRS F9: the tender records read for the need.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sources",
+    "missing",
+    "sap"
+  ],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_key",
+          "selected",
+          "fields",
+          "awarded_to"
+        ],
+        "properties": {
+          "case_key": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "selected": {
+            "type": "boolean"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 300
+            }
+          },
+          "awarded_to": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        }
+      }
+    },
+    "missing": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      }
+    },
+    "sap": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

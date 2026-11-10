@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "artifact.validation",
+  "description": "What validate leaves on the record (FRS F30-F34, F46): the status, the consolidated checks, the document versions validated and the stored report.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "string",
+        "maxLength": 300
+      }
+    },
+    "checks": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check",
+          "severity",
+          "doc",
+          "says"
+        ],
+        "properties": {
+          "check": {
+            "enum": [
+              "format",
+              "completeness",
+              "consistency",
+              "manual",
+              "integrity",
+              "versions",
+              "review"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "fail",
+              "warn",
+              "info"
+            ]
+          },
+          "doc": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "says": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "documents_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "report": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "doc_id",
+        "version"
+      ],
+      "properties": {
+        "doc_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

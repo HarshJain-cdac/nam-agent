@@ -1,0 +1,21 @@
+{
+  "title": "nam.confirm result",
+  "description": "A confirmed or rejected pending action. The response's stage and pending_action are the case's after it.",
+  "type": "object",
+  "required": ["action_id", "kind", "decision", "reason", "stage", "result", "replay", "tenant",
+               "user", "run_id", "at"],
+  "additionalProperties": false,
+  "properties": {
+    "action_id": {"type": "string", "pattern": "^act_[a-z0-9]{4,32}$"},
+    "kind": {"type": "string"},
+    "decision": {"enum": ["approve", "reject"]},
+    "reason": {"type": "string"},
+    "stage": {"type": "string", "pattern": "^S\\d{1,2}$", "description": "The stage the action belonged to."},
+    "result": {"type": "object", "description": "What an irreversible action produced, e.g. the PR number."},
+    "replay": {"type": "boolean", "description": "True: it was confirmed before, and nothing ran again."},
+    "tenant": {"type": "string"},
+    "user": {"type": "string"},
+    "run_id": {"type": "string"},
+    "at": {"type": "string"}
+  }
+}

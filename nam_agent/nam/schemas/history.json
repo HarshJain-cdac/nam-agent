@@ -1,0 +1,32 @@
+{
+  "title": "NAM case history (nam.v1)",
+  "description": "GET /v1/nam/cases/{id}/history: one entry per version, oldest first.",
+  "type": "object",
+  "required": ["version", "case_id", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": "nam.v1"},
+    "case_id": {"type": "string", "pattern": "^NAM-\\d{4}-\\d{4,8}$"},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_version", "at", "by", "flow", "run_id", "reason", "changed"],
+        "additionalProperties": false,
+        "properties": {
+          "case_version": {"type": "integer", "minimum": 1},
+          "at": {"type": "string"},
+          "by": {
+            "type": "object", "required": ["tenant", "user"], "additionalProperties": false,
+            "properties": {"tenant": {"type": "string"}, "user": {"type": "string"}}
+          },
+          "flow": {"type": "string", "description": "Empty when written outside a harness call."},
+          "run_id": {"type": "string"},
+          "reason": {"type": "string"},
+          "changed": {"type": "array", "items": {"type": "string"},
+                      "description": "The need's top-level fields this version changed."}
+        }
+      }
+    }
+  }
+}
