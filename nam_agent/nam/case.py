@@ -227,7 +227,7 @@ def versions(conn: sqlite3.Connection, case_id: str) -> list[dict]:
 # the acts undo takes back: the officer's (an ask, a search or a read is the
 # agent's, and is gone over with the act it led to)
 OFFICER_ACTS = ("need", "choose", "answer", "detail", "pick", "unpick", "other", "estimate",
-                "pr")
+                "pr", "review")
 
 
 def _version(conn: sqlite3.Connection, case_id: str, v: int) -> dict | None:
@@ -316,6 +316,24 @@ def chosen(data: dict) -> list[dict]:
 def current_item(data: dict) -> dict | None:
     """The item being worked now: the first chosen one not yet in the cart."""
     return next((it for it in chosen(data) if not it.get("picked")), None)
+
+
+def cart_full(data: dict) -> bool:
+    """Every item the officer takes forward is in the cart."""
+    items = chosen(data or {})
+    return bool(items) and all(it.get("picked") for it in items)
+
+
+def review(data: dict) -> str:
+    """Where the cart review stands: "" (items still to put in the cart),
+    "due" (all in, not asked yet), "asked", "adding" (the officer wants more
+    items) or "done" (the officer said that is everything)."""
+    r = (data or {}).get("review") or {}
+    if r.get("adding"):
+        return "adding"
+    if not cart_full(data):
+        return ""
+    return "done" if r.get("done") else "asked" if r.get("asked") else "due"
 
 
 def progress(data: dict, it: dict) -> dict | None:

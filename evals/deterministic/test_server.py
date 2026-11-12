@@ -199,3 +199,27 @@ def test_the_client_file_drives_the_chat(server):
         bob.chat_history(turn["session_id"])
     assert refused.value.status == 403
     assert alice.health()["ok"] is True
+
+
+def test_broken_tool_arguments_from_the_model_are_an_error_it_can_correct():
+    from nam_agent.loop.models import BAD_ARGUMENTS, _arguments
+    from nam_agent.tools.registry import Tool, ToolRegistry
+
+    assert _arguments('{"item": "valve", "key" "V-2"}') == {BAD_ARGUMENTS: '{"item": "valve", "key" "V-2"}'}
+    assert _arguments('{"item": "valve"}') == {"item": "valve"}
+    reg = ToolRegistry()
+    reg.register(Tool(name="nam_pick", description="", input_schema={"type": "object"},
+                      fn=lambda **a: "picked"))
+    out = reg.execute("nam_pick", _arguments('{"item": "valve", "key" "V-2"}'))
+    assert out.startswith("Error running nam_pick: the arguments were not valid JSON")
+
+
+def test_a_failed_turn_is_an_error_reply_not_a_dropped_connection(server, monkeypatch):
+    base = server()
+
+    def boom(*a, **k):
+        raise RuntimeError("model down")
+
+    monkeypatch.setattr(chats, "chat", boom)
+    status, body, _ = call(base, "POST", "/api/chat", {"message": "hello"})
+    assert status == 500 and body["error"].startswith("the turn failed (RuntimeError)")

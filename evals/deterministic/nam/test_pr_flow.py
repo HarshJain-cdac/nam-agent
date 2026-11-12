@@ -103,6 +103,9 @@ def test_the_guide_names_the_next_act_from_the_case(steps):
     assert "nam_need" in flow.next_hint(None)
     steps["nam_need"].fn(category="goods", need="temperature gauge")
     conn = steps["_conn"]
+    # first, once: what NRL bought with it before (a suggestion only if one belongs)
+    assert "nam_related" in flow.next_hint(case.for_session(conn, "chat-1"))
+    steps["nam_related"].fn()
     assert "5 records are still in" in flow.next_hint(case.for_session(conn, "chat-1"))
     _ask(steps, **GAUGE_Q)
     assert "read it with nam_answer" in flow.next_hint(case.for_session(conn, "chat-1"))
@@ -491,6 +494,10 @@ def test_a_reply_that_hides_the_estimate_gets_its_table(steps):
 
 def test_the_pr_is_confirmed_only_when_complete_and_never_gets_a_made_up_number(steps, tmp_path):
     _picked(steps)
+    from nam_agent.nam import chatstate
+
+    chatstate.mark_asked("")                      # the next turn: "That's everything"
+    assert steps["nam_cart"].fn(answer="done").startswith("The cart is complete")
     out = steps["nam_pr"].fn(action="fill")       # no estimate needed: it is optional
     assert "| 1 | I-TG-ARC-G080-01 | TG Bimetallic U100mm 6mm dia 0-80Cel | 20.0 | NOS |" in out
     assert "PUR-INSTMNT-1003188" in out and "SAP PO 4500024964" in out

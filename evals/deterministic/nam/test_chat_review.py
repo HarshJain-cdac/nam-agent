@@ -182,8 +182,10 @@ def test_a_choice_in_the_officers_own_words_is_shown_and_confirmed_before_the_ca
         chatstate.reset_emitter(emit)
         chatstate.leave(token)
     assert "In the cart for 'valve': V-2" in out
-    added = cards[-1]
-    assert added["group"] == "cart" and added["title"] == "Added to the cart"
+    added = next(c for c in cards if c.get("title") == "Added to the cart")
+    assert added["group"] == "cart"
+    # the last item in: the whole cart is shown too, for the officer to check
+    assert any(c.get("title") == "Your cart" for c in cards)
     fields = dict((k, v) for k, v, _ in added["cards"][0]["fields"])
     assert fields["Code"] == "V-2" and fields["PR"] == "0010000002" and fields["Quantity"] == "4 NOS"
     assert added["cards"][0]["badge"] == "1 of 1 in the cart"

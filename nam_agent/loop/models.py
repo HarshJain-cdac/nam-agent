@@ -403,6 +403,20 @@ def sampling() -> dict:
     return out
 
 
+BAD_ARGUMENTS = "__arguments_not_json__"
+
+
+def _arguments(raw: str | None) -> dict:
+    """A tool call's arguments. Broken JSON from the model (it happens with
+    small models) is not a crash: the call carries the raw text, and the
+    registry answers it with an error the model can correct."""
+    try:
+        value = json.loads(raw or "{}")
+    except ValueError:
+        return {BAD_ARGUMENTS: str(raw)[:400]}
+    return value if isinstance(value, dict) else {BAD_ARGUMENTS: str(raw)[:400]}
+
+
 class OpenAICompatClient:
     """Speaks the Anthropic Messages shape the loop expects, backed by an
     OpenAI-style chat.completions API. ~60 lines is the entire difference
@@ -618,7 +632,7 @@ class OpenAICompatClient:
         for call in choice.tool_calls or []:
             blocks.append(SimpleNamespace(
                 type="tool_use", id=call.id, name=call.function.name,
-                input=json.loads(call.function.arguments or "{}"),
+                input=_arguments(call.function.arguments),
                 # Gemini's thinking models attach a thought_signature here and
                 # REQUIRE it echoed back with the tool call next turn, else the
                 # follow-up 400s ("missing a thought_signature"). Carry it so

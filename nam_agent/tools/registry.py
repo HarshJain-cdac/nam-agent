@@ -60,6 +60,11 @@ class ToolRegistry:
         tool = self._tools.get(name)
         if tool is None:
             return self._unknown(name)
+        from nam_agent.loop.models import BAD_ARGUMENTS
+
+        if BAD_ARGUMENTS in (args or {}):
+            return (f"Error running {name}: the arguments were not valid JSON "
+                    f"({args[BAD_ARGUMENTS][:200]!r}). Call {name} again with valid JSON.")
         try:
             if tool.wants_notify:
                 return tool.fn(**args, _notify=notify or (lambda kind, ev: None))

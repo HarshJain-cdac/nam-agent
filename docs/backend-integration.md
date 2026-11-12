@@ -179,7 +179,7 @@ whatever its `group`:
 | `group` | What it holds |
 |---|---|
 | `records` | the past PRs that match the item still being narrowed: one card per PR, the matching SAP records inside it |
-| `cart` | "Added to the cart": what was just put in the cart (item, code, PR, PUR, quantity, last rate, "1 of 3 in the cart") |
+| `cart` | "Added to the cart": what was just put in the cart (item, code, PR, PUR, quantity, last rate, "1 of 3 in the cart"); and "Your cart": every item, when all are in and the officer is asked whether that is everything |
 | `pr` | one item's PR, or the common PR, with the fields still missing marked |
 | `purs` | PUR cases, with how many of the need's materials each holds |
 
@@ -201,6 +201,8 @@ model, so these exact strings matter:
 | "Continue with this" on a records card, with one of its items selected | that item's `send` |
 | "Show me something else" on a records card | the card's `action.other` |
 | "Yes, add it" / "No, show the others" (confirming a pick typed in words) | that text |
+| "Yes, go with Goods" / "Change to Services" ... (confirming the category the agent guessed) | that text |
+| "That's everything" / "Add more items" (when every item is in the cart) | that text |
 | "Undo last step" | `Undo the last step` |
 
 Typed answers are fine too ("the first one", "go with the 2023 PR"): a pick

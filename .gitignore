@@ -29,3 +29,8 @@ traces/
 nohup.out
 
 .DS_Store
+
+# editor swap files (a swap of .env holds its secrets)
+*.swp
+*.swo
+*~

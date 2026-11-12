@@ -683,3 +683,71 @@ def _same_short_text(cands: list[dict], limit: int = 6) -> list[str]:
         out.append(f"- '{guard.sanitise(group[0]['description'], 70)}' ({len(group)} codes): "
                    + "; ".join(parts))
     return out
+
+
+def on_pr(kg_url: str, pr_no: str, call=None) -> tuple[list[dict], list[str]]:
+    """(the records SAP holds on one PR, problems): every material bought on
+    it, found by the PR's own number."""
+    from nam_agent.nam import kg_mcp
+
+    call = call or kg_mcp.call
+    want = str(pr_no).lstrip("0")
+    try:
+        data = call(kg_url, "sap_search", query=want, top_k=50)
+    except Exception as exc:  # noqa: BLE001 - said, never hidden
+        return [], [f"PR {doc_no(pr_no)}: SAP could not be read ({type(exc).__name__})"]
+    recs = _sap(data if isinstance(data, dict) else {})
+    return [r for r in recs if any(str(ln.get("pr_no") or "").lstrip("0") == want
+                                   for ln in r.get("lines") or [])], []
+
+
+def _lead(description: str) -> str:
+    """A description's first word, as SAP writes the kind of thing first."""
+    m = re.match(r"\W*([A-Za-z][A-Za-z/&.]*)", description or "")
+    return m.group(1).lower().rstrip(".") if m else ""
+
+
+def co_bought(kg_url: str, items: list[dict], call=None, per_item: int = 3,
+              most: int = 6) -> dict:
+    """What NRL bought together with the need's materials before: the latest
+    past PRs holding each material (per_item each, most in all), and every
+    other material on those PRs with how many of them it was on. Only SAP's
+    records; which of them belong to this need is the agent's judgement."""
+    prs: list[str] = []
+    for it in items:
+        latest: dict[str, str] = {}
+        for c in it.get("candidates") or []:
+            for p in prs_of(c):
+                latest[p["pr_no"]] = max(latest.get(p["pr_no"], ""), p["latest"])
+        for pr_no in sorted(latest, key=lambda n: latest[n], reverse=True)[:per_item]:
+            if pr_no not in prs:
+                prs.append(pr_no)
+    prs = prs[:most]
+    own = {c["key"] for it in items for c in it.get("candidates") or []}
+    # a record SAP names the way it names one of the need's own ("TG
+    # Capillary ..." beside the need's "TG Bimetallic ...") may be another size
+    # of the same material: it is marked so, for the agent to judge
+    leads: dict[str, str] = {}
+    for it in items:
+        for c in it.get("candidates") or []:
+            lead = _lead(c.get("description") or "")
+            if lead:
+                leads.setdefault(lead, it["name"])
+    rows: dict[str, dict] = {}
+    problems: list[str] = []
+    for pr_no in prs:
+        recs, bad = on_pr(kg_url, pr_no, call)
+        problems += bad
+        for r in recs:
+            if r["key"] in own:
+                continue
+            row = rows.setdefault(r["key"], {"key": r["key"], "code": r.get("code") or "",
+                                             "description": r.get("description") or "",
+                                             "unit": unit(r), "prs": [], "latest": "",
+                                             "like": leads.get(_lead(r.get("description") or ""), "")})
+            if pr_no not in row["prs"]:
+                row["prs"].append(pr_no)
+            dates = [str(ln.get("date") or "") for ln in r.get("lines") or []]
+            row["latest"] = max([row["latest"], *dates])
+    ranked = sorted(rows.values(), key=lambda r: (len(r["prs"]), r["latest"]), reverse=True)
+    return {"prs": prs, "rows": ranked, "problems": problems}

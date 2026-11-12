@@ -80,7 +80,11 @@ def fill(case: dict, it: dict, until: date | None = None) -> dict:
             "from": {"material_code": "the material picked in stage 1",
                      "specification": "stage 1", "quantity": "stage 1",
                      "valuation_price": price["source"]}}
+    # the past PR the item follows, and its purchase orders: what the officer
+    # chose, kept on the new PR so it is never lost from sight
+    pos = sorted({str(ln.get("po_no")) for ln in p.get("lines") or [] if ln.get("po_no")})
     pr = {"item": it["name"], "header": header, "offered": offered,
+          "based_on": {"pr": p.get("pr_no") or "", "po": pos[:3], "pur": p.get("pur") or ""},
           "reference_tenders": [p["pur"]] if p.get("pur") else [], "lines": [line],
           "price": price, "status": old.get("status") if old.get("status") in DONE else "draft",
           "pr_no": old.get("pr_no")}
@@ -180,6 +184,13 @@ def table(pr: dict) -> str:
     rows += [f"| {label} | {h.get(k) or '(missing)'}"
              + (f" (as for '{pr['offered'][k]}')" if k in pr.get("offered", {}) else "") + " |"
              for k, label in OFFICER.items()]
+    based = pr.get("based_on") or {}
+    if based.get("pr"):
+        from nam_agent.nam import narrow
+
+        rows.append(f"| Based on past PR | {narrow.doc_no(based['pr'])}"
+                    + (" (PO " + ", ".join(narrow.doc_no(x) for x in based.get("po") or [])
+                       + ")" if based.get("po") else "") + " |")
     rows.append(f"| Reference tender | {', '.join(pr['reference_tenders']) or '-'} |")
     p = pr.get("price") or {}
     rows.append(f"| Price basis | {p.get('source', '-')}; {p.get('result', '-')}"

@@ -45,9 +45,11 @@ class Step:
 
 STEPS: tuple[Step, ...] = (
     Step("1a", 1, "Category",
-         "Goods, services or works: the harness asks it when the need is opened; the "
-         "officer's answer goes back to nam_need.",
-         "nam_need(category=...)"),
+         "Goods, services or works: judge it from the need and give it to nam_need with why= "
+         "(one line from the officer's words); unless they said it themselves, the harness "
+         "asks them to confirm or change it before anything is searched. Their answer goes "
+         "back to nam_need.",
+         "nam_need(category=..., why=...)"),
     Step("1b", 1, "The need",
          "The officer types the need or a job description in their own words; read it back "
          "in one line.",
@@ -58,9 +60,11 @@ STEPS: tuple[Step, ...] = (
          "holds of each.",
          "nam_need(items=[...])"),
     Step("1d", 1, "Choose the items",
-         "Ask which materials go forward (the officer may choose several); they are then "
-         "worked one at a time, in that order.",
-         "nam_choose(question=...) then nam_choose(items=[...])"),
+         "See what NRL bought together with these materials on their past PRs (nam_related) "
+         "and judge which of those belong to this need. Then ask which materials go forward, "
+         "the ones that belong suggested beside the need's own, each with why (the officer "
+         "may choose several); they are then worked one at a time, in that order.",
+         "nam_related(); nam_choose(question=..., suggest=[...]) then nam_choose(items=[...])"),
     Step("1e", 1, "Find the missing details",
          "For the item being worked, find what still tells its records apart: size or range, "
          "material, standard, rating, certificate, make. Records that share a short text "
@@ -79,8 +83,11 @@ STEPS: tuple[Step, ...] = (
     Step("1h", 1, "Into the cart",
          "The officer continues with the one PR that matches (its card); it goes in the cart "
          "with that PR's quantity, and nothing more is asked. Then the next chosen item, the "
-         "same way.",
-         "nam_pick(item, key, pr)"),
+         "same way. With every item in, the harness shows the whole cart and asks whether "
+         "that is everything: summarise the cart in plain words. 'More' adds materials to "
+         "this same case and cart (nam_need add=true), worked the same way; the PURs and the "
+         "PRs wait until the officer says that is everything.",
+         "nam_pick(item, key, pr); nam_cart(answer); nam_need(items, add=true)"),
     Step("1i", 1, "Undo",
          "Whenever the officer wants a step back: an answer, a choice, a material in the "
          "cart, a PR field.",
@@ -176,6 +183,8 @@ def stage_of(case: dict | None) -> tuple[str, str]:
     now = nam_case.current_item(case)
     if now is not None:
         return ("1f" if now.get("pending") else "1e"), "1h"
+    if nam_case.review(case) in ("due", "asked", "adding"):
+        return "1h", "1j"
     chosen = nam_case.chosen(case)
     if all((it.get("pr") or {}).get("status") in ("ready_for_sap", "sent") for it in chosen):
         return "3b", "done"
@@ -194,10 +203,14 @@ def next_hint(case: dict | None) -> str:
 
     items = case["items"]
     if case.get("asking_category"):
-        return ("the officer's message is most likely the category: record it with "
+        guess = case["asking_category"].get("guess")
+        return ("the officer's message is most likely their answer to the category question"
+                + (f" (the guess was {guess}: a yes keeps it, or they name another)" if guess
+                   else "") + ": record the category they confirm or name with "
                 "nam_need(category='goods' | 'services' | 'works'); SAP is searched then.")
     if not case.get("category"):
-        return "ask goods, services or works: call nam_need again without a category."
+        return ("judge goods, services or works from the need and call nam_need with "
+                "category= and why=; the officer confirms or changes it.")
     if any(not it.get("searched") for it in items):
         return "search the materials not searched yet (nam_need again, or nam_search)."
     if case.get("choosing"):
@@ -205,9 +218,27 @@ def next_hint(case: dict | None) -> str:
                 "with nam_choose(items=[...]).")
     offer = [it for it in items if it.get("candidates")]
     if len(offer) > 1 and not any("selected" in it for it in items):
+        if not case.get("related"):
+            return ("see what NRL bought together with these materials before (nam_related), "
+                    "then ask which go forward with nam_choose(question=...), suggesting only "
+                    "what belongs to this need (suggest=[...]).")
         return ("show how many SAP holds of each material and ask which go forward with "
-                "nam_choose(question=...).")
+                "nam_choose(question=...), with suggest=[...] for what belongs to this need.")
+    if (len(items) == 1 and offer and not case.get("related") and not items[0].get("answers")
+            and not items[0].get("pending") and not items[0].get("picked")):
+        return ("see what NRL bought together with this material before (nam_related): if "
+                "something belongs to this need, ask with nam_choose(question=..., "
+                "suggest=[...]); if nothing does, go on with its first question.")
+    review = nam_case.review(case)
+    if review == "adding" and nam_case.cart_full(case):
+        return ("the officer wants to add more to this cart: ask which materials, in plain "
+                "words; their answer goes to nam_need(items=[...], add=true).")
     it = nam_case.current_item(case)
+    if it is None and review in ("due", "asked"):
+        return ("every chosen item is in the cart: summarise it for the officer in plain words "
+                "(each item, what it is, how many, the past PR it follows; no codes) and let "
+                "the harness's question stand: is that everything, or add more? Their answer "
+                "goes to nam_cart.")
     if it is not None:
         name, left = it["name"], len(nam_case.remaining(it))
         if it.get("pending"):

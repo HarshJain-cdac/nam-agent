@@ -167,6 +167,9 @@ def pr(item: str, p: dict) -> dict:
         "badge": "ready for SAP" if done else "draft",
         "status": price.get("result") or "", "year": "",
         "fields": _fields(("Code", ln.get("material_code"), "code"),
+                          ("Based on PR", narrow.doc_no((p.get("based_on") or {}).get("pr")), ""),
+                          ("Its PO", ", ".join(narrow.doc_no(x) for x in
+                                               (p.get("based_on") or {}).get("po") or []), ""),
                           ("Quantity", f"{ln.get('quantity') or '?'} {ln.get('unit') or ''}".strip(),
                            "" if ln.get("quantity") else "missing"),
                           ("Valuation price", _rs(ln.get("valuation_price")) or "missing",
@@ -178,6 +181,12 @@ def pr(item: str, p: dict) -> dict:
                  else "Every mandatory field is filled: it can be confirmed.")}]}
 
 
+def _orders(p: dict) -> str:
+    """The purchase orders of the PR an item follows, from its SAP lines."""
+    pos = sorted({str(ln.get("po_no")) for ln in p.get("lines") or [] if ln.get("po_no")})
+    return ", ".join(narrow.doc_no(x) for x in pos[:3])
+
+
 def added(item: str, p: dict, n: int, of: int) -> dict:
     """What went into the cart, so the officer sees exactly what was chosen."""
     last = next((ln for ln in p.get("lines") or [] if ln.get("rate_inr")), {})
@@ -186,8 +195,32 @@ def added(item: str, p: dict, n: int, of: int) -> dict:
         "status": "", "year": "",
         "fields": _fields(("Item", item, ""), ("Code", p.get("code"), "code"),
                           ("PR", narrow.doc_no(p.get("pr_no")), ""),
+                          ("PO", _orders(p), ""),
                           ("PUR", p.get("pur"), ""),
                           ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
                                         if p.get("quantity") else ""), ""),
                           ("Last rate", _rs(last.get("rate_inr")), "")),
         "note": "Wrong one? Use Undo last step."}]}
+
+
+def cart(data: dict) -> dict:
+    """Every item in the cart, for the officer to check before the PURs and the
+    PRs: one card per item, from the case (never the model's account)."""
+    from nam_agent.nam import case
+
+    chosen = case.chosen(data)
+    rows = []
+    for n, it in enumerate([i for i in chosen if i.get("picked")], 1):
+        p = it["picked"]
+        last = next((ln for ln in p.get("lines") or [] if ln.get("rate_inr")), {})
+        rows.append({
+            "title": p.get("description") or it["name"], "badge": f"{n} of {len(chosen)}",
+            "status": "", "year": "",
+            "fields": _fields(("Item", it["name"], ""), ("Code", p.get("code"), "code"),
+                              ("PR", narrow.doc_no(p.get("pr_no")), ""),
+                              ("PO", _orders(p), ""),
+                              ("PUR", p.get("pur"), ""),
+                              ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
+                                            if p.get("quantity") else ""), ""),
+                              ("Last rate", _rs(last.get("rate_inr")), ""))})
+    return {"group": "cart", "title": "Your cart", "cards": rows}

@@ -144,6 +144,7 @@ def test_the_cart_fills_item_by_item_and_shows_the_next_one(t):
     out = t["nam_pick"].fn(key="T-1")
     assert "quantity 4 NOS (as in that PR)" in out and "Asked" not in out
     assert "Every chosen item is in the cart" in out
+    chatstate.mark_asked("")                      # the next turn: the cart question was asked
     # the officer may still change it
     out = t["nam_pick"].fn(item="thermowell", quantity=2, unit="NOS")
     assert "quantity 2 NOS" in out and "(as in that PR)" not in out
@@ -154,7 +155,7 @@ def test_the_cart_fills_item_by_item_and_shows_the_next_one(t):
 
 # -- 1j: the matching PURs ------------------------------------------------------------
 
-def _cart(t, chosen=("valve", "thermowell")):
+def _cart(t, chosen=("valve", "thermowell"), complete=True):
     _need(t)
     t["nam_choose"].fn(items=list(chosen))
     if "valve" in chosen:
@@ -162,6 +163,9 @@ def _cart(t, chosen=("valve", "thermowell")):
         t["nam_pick"].fn(item="valve", key="V-2", quantity=4)
     if "thermowell" in chosen:
         t["nam_pick"].fn(item="thermowell", key="T-1", quantity=2)
+    chatstate.mark_asked("")                   # the next turn
+    if complete:                               # the officer: "That's everything"
+        assert t["nam_cart"].fn(answer="done").startswith("The cart is complete")
 
 
 def test_the_pur_holding_every_material_even_one_not_chosen_is_the_100_match(t):
@@ -218,7 +222,7 @@ def test_a_flagged_price_waits_for_the_officers_decision(t):
 # -- undo ----------------------------------------------------------------------------
 
 def test_undo_goes_back_one_officer_act_at_a_time(t):
-    _cart(t)
+    _cart(t, complete=False)
     out = t["nam_undo"].fn()
     assert out.startswith("Took back: put T-1 in the cart for 'thermowell'")
     out = t["nam_undo"].fn()
@@ -235,9 +239,10 @@ def test_undo_goes_back_one_officer_act_at_a_time(t):
 
 
 def test_undo_after_a_new_act_takes_back_that_act_first(t):
-    _cart(t)
+    _cart(t, complete=False)
     t["nam_undo"].fn()                                   # T-1 out
     t["nam_pick"].fn(item="thermowell", key="T-2", quantity=1)
+    chatstate.mark_asked("")                             # the next turn
     out = t["nam_undo"].fn()
     assert out.startswith("Took back: put T-2 in the cart")
     out = t["nam_undo"].fn(steps=2)
@@ -334,7 +339,7 @@ def test_details_and_the_cart_are_saved_item_by_item(t):
 
 
 def test_an_undo_takes_the_cart_and_the_detail_back_from_the_node(t):
-    _cart(t)
+    _cart(t, complete=False)
     t["nam_undo"].fn(steps=3)                 # T-1, V-2 and the answer 'screwed'
     d, _ = _node(t)
     assert [r["cart"] for r in d["items"][:2]] == [None, None]
@@ -658,6 +663,7 @@ def test_show_me_something_else_gives_the_closest_other_then_asks_again(t):
     assert group["cards"][0]["action"]["other"] == f"{stage_tools.OTHER_LABEL} for thermowell"
     # the suggestion can be taken
     assert "In the cart for 'thermowell': T-2" in t["nam_pick"].fn(key="T-2", quantity=1)
+    chatstate.mark_asked("")                             # the next turn
     t["nam_undo"].fn()
     # asked again: the last answer is taken back, the specification is open again
     out = t["nam_other"].fn()
@@ -721,12 +727,13 @@ def test_a_typed_copy_of_the_options_is_dropped_when_the_buttons_show_them():
            "options": ["Thermocouple (16 materials)", "TG (36 materials)", "Skin (10 materials)"]}
     reply = ("Which type of Temperature Gauge do you need?\n- Thermocouple\n- **TG**\n- Skin\n"
              "- Something else\nSAP holds 53 materials for it.")
-    assert stage_tools.drop_typed_options(reply, ask) == (
-        "Which type of Temperature Gauge do you need?\nSAP holds 53 materials for it.")
+    # the question is said once, last, right above its buttons
+    q = "Which type of Temperature Gauge do you need?"
+    assert stage_tools.drop_typed_options(reply, ask) == f"SAP holds 53 materials for it.\n\n{q}"
     assert stage_tools.drop_typed_options("Pick one. Options: Thermocouple | TG | Skin",
-                                          ask) == "Pick one."
+                                          ask) == q          # "Pick one." is the buttons' job
     plain = "SAP holds 53 materials. Most are TG bimetallic gauges."
-    assert stage_tools.drop_typed_options(plain, ask) == plain
+    assert stage_tools.drop_typed_options(plain, ask) == f"{plain}\n\n{q}"
 
 
 def test_the_items_initials_are_the_item_itself_and_filler_words_are_no_type():
@@ -763,7 +770,7 @@ def test_a_type_question_over_other_materials_is_refused_and_typed_extras_are_dr
                                                                          "Thermocouple (2 materials)"]}
     reply = "Which kind of material do you need?\n- TG\n- Skin\n- Ceramic\n\nSAP holds 4 records."
     assert stage_tools.drop_typed_options(reply, ask) == (
-        "Which kind of material do you need?\n\nSAP holds 4 records.")
+        "SAP holds 4 records.\n\nWhich kind of material do you need?")
 
 
 def test_the_category_is_asked_unless_the_officer_said_it(tmp_path):
@@ -772,8 +779,12 @@ def test_the_category_is_asked_unless_the_officer_said_it(tmp_path):
     t = {x.name: x for x in stage_tools.make_tools(conn, tmp_path, URL, call)}
     token = chatstate.enter("chat-k", "I need gaskets")          # no category in their words
     try:
-        out = t["nam_need"].fn(need="gaskets", items=["gasket"], category="goods")
-        assert "Is this goods, services or works?" in out       # the agent's guess is not taken
+        out = t["nam_need"].fn(need="gaskets", items=["gasket"], category="goods",
+                               why="gaskets are supplied as materials")
+        # the agent's guess is not taken: the officer confirms or changes it
+        assert 'Asked: "This looks like goods: gaskets are supplied as materials.' in out
+        assert "Options: Yes, go with Goods | Change to Services | Change to Works" in out
+        assert case.for_session(conn, "chat-k").get("category") in (None, "")
     finally:
         chatstate.leave(token)
     token = chatstate.enter("chat-k2", "Goods: supply of gaskets")
@@ -806,8 +817,7 @@ def test_a_typed_list_under_an_options_heading_goes_with_the_heading():
                                                                "U-240 (1 material)"]}
     reply = ("**Which U size do you need?**  \nOptions:  \n\n- U\u2011210 (1 material)  \n"
              "- U\u2011240 (1 material)  \n\nPlease select one.")
-    assert stage_tools.drop_typed_options(reply, ask) == (
-        "**Which U size do you need?**  \n\nPlease select one.")
+    assert stage_tools.drop_typed_options(reply, ask) == "Which U size do you need?"
 
 
 def test_when_the_types_do_not_split_the_harness_asks_by_the_values_that_do():
@@ -819,3 +829,50 @@ def test_when_the_types_do_not_split_the_harness_asks_by_the_values_that_do():
     q = narrow.suggest(cands, "thermowell")
     assert q is not None and q["question"] == "Which of these does the thermowell you need have?"
     assert len(q["options"]) >= 2
+
+
+def test_the_question_is_said_once_however_the_model_words_it():
+    """From an officer's chat: the model typed the question in its own words with
+    the options as "0-200 °C" while the buttons said "0-200 DegC (3 materials)",
+    so the page showed the question and its options twice."""
+    ask = {"question": "What is the temperature range?",
+           "options": ["0-200 DegC (3 materials)", "0-150 DegC (2 materials)",
+                       "Something else (36 materials)"]}
+    reply = ("**What temperature range do you need?**  \n\n- 0‑200 °C  \n"
+             "- 0‑150 °C  \n\n(If none of these fit, let me know.)")
+    assert stage_tools.drop_typed_options(reply, ask) == "What is the temperature range?"
+    cat = {"question": "Is this goods, services or works?", "options": ["Goods", "Services", "Works"]}
+    said = ("Got it. I’ve opened a case for **capillary**.  \n"
+            "Please select whether this is **Goods**, **Services** or **Works**.")
+    assert stage_tools.drop_typed_options(said, cat) == (
+        "Got it. I’ve opened a case for **capillary**.\n\nIs this goods, services or works?")
+    yes = {"question": "Add this thermowell to the cart?", "options": ["Yes, add it", "No, show the others"]}
+    assert stage_tools.drop_typed_options("**Add this thermowell to the cart?**\n\n[options: Yes, No]",
+                                          yes) == "Add this thermowell to the cart?"
+    # a sentence about the records is not the question: it stays
+    other = {"question": "Which U code do you need?", "options": ["U320 (1 material)", "U400 (1 material)"]}
+    assert stage_tools.drop_typed_options("The 0-200 range suits a hot line.", other) == (
+        "The 0-200 range suits a hot line.\n\nWhich U code do you need?")
+
+
+def test_a_question_said_again_over_two_lines_or_inside_a_line_is_said_once():
+    """Live, the model wrote the category question as two lines, then once
+    more in one line, above the buttons that ask it."""
+    q = ("This looks like goods: gauges and thermowells are supplied. Shall we go ahead "
+         "with goods, or change it?")
+    ask = {"question": q, "options": ["Yes, go with Goods", "Change to Services"]}
+    split = ("This looks like goods: gauges and thermowells are supplied.  \n"
+             "**Shall we go ahead with goods, or change it?**\n\n" + q)
+    assert stage_tools.drop_typed_options(split, ask) == q
+    assert stage_tools.drop_typed_options("Got it, a case for gauges. " + q, ask) == (
+        f"Got it, a case for gauges.\n\n{q}")
+
+
+def test_a_short_instruction_about_the_buttons_goes_and_advice_stays():
+    ask = {"question": "Which U code do you need?", "options": ["U240 (1 material)", "U360 (1 material)"]}
+    q = ask["question"]
+    for hint in ("Please select one.", "Choose the ones you need below.", "(Select the ones you need.)"):
+        assert stage_tools.drop_typed_options(hint, ask) == q, hint
+    for advice in ("Pick the 300# one if it is for the CDU.",
+                   "Select the U code for the CDU furnace thermowell, which runs hot."):
+        assert stage_tools.drop_typed_options(advice, ask) == f"{advice}\n\n{q}"

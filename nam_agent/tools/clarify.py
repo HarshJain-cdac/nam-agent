@@ -33,6 +33,18 @@ def clean_options(options: list) -> list[str]:
     return out
 
 
+def _names_a_pr_field(question: str, labels) -> bool:
+    """The question asks for one of the PR's officer fields (by its label's words)."""
+    import re
+
+    words = set(re.findall(r"[a-z]+", (question or "").lower()))
+    for label in labels:
+        need = {w for w in re.findall(r"[a-z]+", label.lower().split("(")[0]) if len(w) > 2}
+        if need and need <= words:
+            return True
+    return False
+
+
 def make_tool() -> Tool:
     def ask_options(question: str = "", options: list[str] | None = None, _notify=None) -> str:
         from nam_agent.nam import chatstate
@@ -46,6 +58,13 @@ def make_tool() -> Tool:
             return ("A NAM case is open in this chat: ask with nam_ask, whose options come "
                     "from the records. A detail the records do not split on (a quantity, a "
                     "date) is asked in plain words, without options. Nothing was shown.")
+        from nam_agent.nam import pr as nam_pr
+
+        if _names_a_pr_field(question, nam_pr.OFFICER.values()):
+            # the officer's own data (a date, a plant, a reason): choices made
+            # up for it would be the model's values, not theirs
+            return ("That is a PR field the officer gives in their own words: ask it in plain "
+                    "words, without options. Nothing was shown.")
         options = clean_options(options or [])
         if not question or not options:
             return ("ask_options needs both a question and at least two options. "

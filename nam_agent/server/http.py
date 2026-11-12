@@ -230,6 +230,11 @@ def make_handler(api_handler):
                     return self._json(chats.chat(message, session_id, focus, actor))
             except chats.ChatRefused as exc:
                 return self._json({"error": str(exc)}, exc.status)
+            except Exception as exc:  # noqa: BLE001 - an error reply, never a dropped connection
+                log.exception("chat turn failed")
+                return self._json({"error": f"the turn failed ({type(exc).__name__}); see the "
+                                            "server log",
+                                   "session_id": payload.get("session_id")}, 500)
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-cache")

@@ -47,5 +47,6 @@ def test_the_guide_says_7777_and_names_the_identity_headers():
 def test_the_button_texts_in_the_guide_are_the_harness_own():
     from nam_agent.nam import stage_tools
 
-    for label in (stage_tools.YES_LABEL, stage_tools.NO_LABEL, stage_tools.UNDO_LABEL):
+    for label in (stage_tools.YES_LABEL, stage_tools.NO_LABEL, stage_tools.UNDO_LABEL,
+                  stage_tools.DONE_LABEL, stage_tools.MORE_LABEL):
         assert label in GUIDE, label
