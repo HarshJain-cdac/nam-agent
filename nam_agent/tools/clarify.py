@@ -65,6 +65,12 @@ def make_tool() -> Tool:
             # up for it would be the model's values, not theirs
             return ("That is a PR field the officer gives in their own words: ask it in plain "
                     "words, without options. Nothing was shown.")
+        import re as _re
+
+        if sum(bool(_re.search(r"\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}\b", str(o)))
+               for o in options or []) >= 2:
+            return ("Dates are the officer's to give: ask for the date in plain words, without "
+                    "options. Nothing was shown.")
         options = clean_options(options or [])
         if not question or not options:
             return ("ask_options needs both a question and at least two options. "

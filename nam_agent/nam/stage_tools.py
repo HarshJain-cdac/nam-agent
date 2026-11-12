@@ -26,6 +26,7 @@ one audit row; every write is a new version of the case (case.py).
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from datetime import date
@@ -108,19 +109,44 @@ def _rs(v) -> str:
 
 
 def records_table(cands: list[dict], limit: int = SHOW) -> str:
-    rows = ["| Key | Is | Description | Last order (date, rate INR) | PUR |",
+    rows = ["| Key | Is | Description | Last order (date, rate INR) | PR |",
             "|---|---|---|---|---|"]
     for c in cands[:limit]:
         last = next((ln for ln in c["lines"] if ln.get("kind") in ("PO", "SERVICE")
                      and ln.get("rate_inr")), None) or (c["lines"][0] if c["lines"] else {})
         doc = narrow.doc_no(last.get("po_no") or last.get("doc_no")) or "-"
-        pur = last.get("pur_case_id") or "-"
+        best = narrow.best_pr(c)
         rows.append(f"| {c['key']} | {narrow.unit(c)} | "
                     f"{guard.sanitise(c['description'], 80).replace('|', '/')} | "
-                    f"{doc} ({last.get('date') or '-'}, {_rs(last.get('rate_inr'))}) | {pur} |")
+                    f"{doc} ({last.get('date') or '-'}, {_rs(last.get('rate_inr'))}) | "
+                    f"{narrow.doc_no(best['pr_no']) if best else '-'} |")
     if len(cands) > limit:
         rows.append(f"(+{len(cands) - limit} more)")
-    return "\n".join(rows)
+    compared = prs_compared(cands[:PICK_FROM]) if len(cands) <= PICK_FROM else ""
+    return "\n".join(rows) + (f"\n{compared}" if compared else "")
+
+
+def prs_compared(cands: list[dict]) -> str:
+    """For a record bought on several PRs: each PR side by side (date, status,
+    quantity, rate, its POs and PUR case), for the agent to explain the
+    difference when the officer asks which to choose. The choice stays theirs."""
+    out = []
+    for c in cands:
+        prs = narrow.prs_of(c)
+        if len(prs) < 2:
+            continue
+        out.append(f"'{guard.sanitise(c['description'], 70)}' is on {len(prs)} PRs (the latest "
+                   "first); if the officer asks which to choose, explain the difference from "
+                   "these, and say which you would take and why, from these facts alone:")
+        for p in prs[:4]:
+            last = p["last"]
+            qty = (f"{_num(last.get('quantity'))} {last.get('unit') or ''}".strip()
+                   if last.get("quantity") not in (None, "") else "-")
+            out.append(f"- PR {narrow.doc_no(p['pr_no'])}: {p['latest'] or '-'}, {p['label']}, "
+                       f"quantity {qty}, rate {_rs(last.get('rate_inr')) or '-'}"
+                       + (f", PO {', '.join(narrow.doc_no(x) for x in p['po'][:3])}"
+                          if p["po"] else ""))
+    return "\n".join(out)
 
 
 PICK_FROM = 3          # records few enough to show the officer as a table to pick from
@@ -464,7 +490,8 @@ class Steps:
         rows = found["rows"][:RELATED_ROWS]
         data["related"] = {"prs": found["prs"],
                            "codes": {r["key"]: r["description"] for r in found["rows"]},
-                           "like": {r["key"]: r["like"] for r in found["rows"] if r.get("like")}}
+                           "like": {r["key"]: r["like"] for r in found["rows"] if r.get("like")},
+                           "on": {r["key"]: len(r["prs"]) for r in found["rows"]}}
         data = self._save(data, "related", "read what was bought with these on "
                           f"{len(found['prs'])} past PR(s)")
         own = ", ".join(it["name"] for it in data["items"])
@@ -485,6 +512,8 @@ class Steps:
                 f"{len(found['rows'])} other material(s); the most often first.\n"
                 + "\n".join(table)
                 + ("\nNot read: " + "; ".join(found["problems"]) if found["problems"] else "")
+                + (f"\nOnly a material on 2 or more of the {len(found['prs'])} PRs can be "
+                   "suggested." if len(found["prs"]) >= 2 else "")
                 + "\nJudge which of these belong to THIS need: what is fitted or used with the "
                   "officer's materials on the same equipment or job, by what the records say. A "
                   "material only bought on the same PR does not belong; another size or variant "
@@ -522,14 +551,40 @@ class Steps:
                     or not re.search(r"[A-Za-z]{3,}", name):
                 raise Stop(f"'{name}' is a material code: name= is what the material is, in "
                            "words, as SAP would write it (keys= carries the codes).")
+            # bought together more than once: on 2 or more of the need's past PRs
+            # (when it has several); one PR alone is a coincidence, not a pattern
+            need_on = 2 if len(rel.get("prs") or []) >= 2 else 1
+            once = [k for k in keys if (rel.get("on") or {}).get(k, need_on) < need_on]
+            if once and len(once) == len(keys):
+                raise Stop(f"{', '.join(once)} {'was' if len(once) == 1 else 'were'} on only one of "
+                           f"the need's {len(rel['prs'])} past PRs: bought together once is not "
+                           "a pattern. Suggest only what was on two or more, or none.")
             like = {(rel.get("like") or {}).get(k) for k in keys}
             if keys and all(like) and len(like) == 1:
                 raise Stop(f"{', '.join(keys)} {'is' if len(keys) == 1 else 'are'} named like "
                            f"'{like.pop()}', already in the need: another size or variant of "
                            "it is not a new item. Suggest only a different material, or none.")
+            # the name says what those records are: the officer sees the name,
+            # and the records it stands for are the ones NRL bought
+            descs = [rel["codes"][k] for k in keys]
+            said = {w for w in narrow.words(name) if len(w) > 2}
+            if said and not any(said & {w for w in narrow.words(d) if len(w) > 2} for d in descs):
+                raise Stop(f"'{name}' is not what {', '.join(keys)} {'is' if len(keys) == 1 else 'are'}"
+                           f" ({'; '.join(d[:60] for d in descs)}): name each suggestion by what "
+                           "its records say.")
             it = {"name": name, "searched": False, "suggested": why, "evidence": keys}
             problems += self._lookup(it)
-            if it.get("candidates"):
+            mine = [c for c in it.get("candidates") or [] if c["key"] in keys]
+            if not mine:
+                # SAP's search by the name found other records: the suggestion is
+                # the records NRL bought, read again by their own codes
+                for k in keys:
+                    found, bad = narrow.find(self.kg_url, k, self.call)
+                    problems += bad
+                    mine += [c for c in found if c["key"] == k]
+            if mine:
+                it.update(candidates=mine, keys=[c["key"] for c in mine],
+                          types=narrow.types(mine, name)[:12])
                 out.append(it)
                 have.add(name.lower())
         if problems:
@@ -544,15 +599,26 @@ class Steps:
             if not (question or "").strip():
                 raise Stop("Give the question in your words (which materials go forward), or "
                            "items= with the officer's choice.")
-            extra = self._suggestions(data, suggest) if suggest else []
+            try:
+                extra = self._suggestions(data, suggest) if suggest else []
+            except Stop as exc:
+                raise Stop(f"{exc} Or ask the choice without suggestions: "
+                           "nam_choose(question=...) alone.") from None
             if len(offer) + len(extra) < 2:
                 raise Stop("There is no choice to ask: "
                            + (f"only '{offer[0]['name']}' has records." if offer else
                               "no material has records.")
                            + (" No suggestion has records in SAP either." if suggest else ""))
-            opts = [f"{it['name']} ({narrow.count(it['candidates'])})" for it in offer]
-            opts += [f"{it['name']} ({narrow.count(it['candidates'])}), {SUGGESTED_TAG}"
-                     for it in extra]
+            want = {"goods": "material", "services": "service line"}.get(data.get("category") or "")
+
+            def label(it):
+                text = f"{it['name']} ({narrow.count(it['candidates'])}"
+                if want and all(narrow.unit(c) != want for c in it["candidates"]):
+                    text += f", no {want} in SAP"          # the officer sees it at once
+                return text + ")"
+
+            opts = [label(it) for it in offer]
+            opts += [f"{label(it)}, {SUGGESTED_TAG}" for it in extra]
             opts.append(ALL)
             data["suggested"] = extra
             data["choosing"] = {"question": " ".join(question.split()), "options": opts,
@@ -691,7 +757,9 @@ class Steps:
         other = narrow.by_meaning(left, name)
         named = [o["label"] for o in options or [] if isinstance(o, dict)
                  and {w for x in (o.get("words") or []) for w in narrow.words(str(x))} & other]
-        if named and set(narrow.words(name)) <= set(narrow.words(question)):
+        calls_type = bool(re.search(r"\b(?:types?|kinds?|sorts?|varieties|variety)\b",
+                                    question or "", re.IGNORECASE))
+        if named and calls_type and set(narrow.words(name)) <= set(narrow.words(question)):
             raise Stop(f"{', '.join(named)} {'is' if len(named) == 1 else 'are'} another material "
                        f"SAP found by meaning, not a type of '{it['name']}': ask which kind of "
                        "material the officer needs (without calling them types of the item), or "
@@ -815,14 +883,9 @@ class Steps:
             raise Stop(f"'{rec['description']}' is not in PR {pr}; its PRs are: "
                        + ", ".join(narrow.doc_no(p["pr_no"]) for p in prs) + ".")
         if chosen is None and len(prs) > 1:
-            from nam_agent.nam import cards
-
-            group = cards.records(it["name"], [rec], it.get("answers"))
-            group["title"] = f"The PRs of '{rec['description'][:60]}'"
-            chatstate.emit("nam_cards", group)
-            return (f"'{rec['description']}' is in {len(prs)} PRs (shown to the officer as "
-                    "cards, the latest first): the item is finished on one. Ask which PR to "
-                    "continue with; their choice is nam_pick(key, pr=...).", data["case_id"])
+            # finished on ONE PR: the best by SAP's own data (the latest, then
+            # PR + PO first), never a list of PRs for the officer to sort out
+            chosen = narrow.best_pr(rec)
         # the officer's own words named it (not a card click): the record the
         # agent understood is shown, and the officer confirms before it is added
         if chatstate.message() and chatstate.reading() != "nam_pick":
@@ -933,8 +996,7 @@ class Steps:
                 out += (f"\n- {i['name']}: {q['description']}, "
                         f"{_num(q['quantity']) if q.get('quantity') else '-'} {q['unit']}"
                         + (f", past PR {narrow.doc_no(q['pr_no'])}" if q.get("pr_no") else "")
-                        + (f", its PO {_cards._orders(q)}" if _cards._orders(q) else "")
-                        + (f", PUR {q['pur']}" if q.get("pur") else ""))
+                        + (f", its PO {_cards._orders(q)}" if _cards._orders(q) else ""))
             out += ("\nEvery chosen item is in the cart, and the harness showed the whole cart "
                     f"and asked \"{REVIEW_QUESTION}\" with buttons. Write the officer a short "
                     "summary in plain words of what the cart holds: each item, what it is, how "
@@ -942,9 +1004,9 @@ class Steps:
                     "them); no material codes and no table. Do not ask the question again. Then stop and wait: their "
                     "answer goes to nam_cart.")
         else:
-            out += ("\nEvery chosen item is in the cart. Next: the PURs that hold the need's "
-                    "materials (nam_tenders with no item), then each item's PR (nam_pr "
-                    "item=..., action='fill'). An estimate for the cart only if the officer asks.")
+            out += ("\nEvery chosen item is in the cart. Next: each item's PR (nam_pr "
+                    "item=..., action='fill'); the PUR cases (nam_tenders) and an estimate only "
+                    "if the officer asks.")
         return out, data["case_id"]
 
     def _ask_review(self, data: dict) -> dict:
@@ -1033,8 +1095,8 @@ class Steps:
         data["review"] = {"done": True}
         data = self._save(data, "review", "the officer said the cart is complete")
         chosen = case.chosen(data)
-        nxt = ("the PURs that hold the need's materials (nam_tenders with no item), then each "
-               "item's PR (nam_pr item=..., action='fill')" if len(data["items"]) > 1 else
+        nxt = ("each item's PR (nam_pr item=..., action='fill'); the PUR cases (nam_tenders) "
+               "only if the officer asks for them" if len(case.chosen(data)) > 1 else
                "the item's PR (nam_pr action='fill')")
         return (f"The cart is complete: {len(chosen)} item(s), "
                 + ", ".join(i["name"] for i in chosen) + f". Next: {nxt}. An estimate for the "
@@ -1637,7 +1699,18 @@ def reminder(conn, session_id: str) -> tuple[str, dict] | None:
     if data and data.get("choosing"):
         q = data["choosing"]
         return q["question"], {"question": q["question"], "options": q["options"],
-                               "field": "nam"}
+                               "field": "nam", "multi": True}
+    offer = [i for i in (data or {}).get("items") or [] if i.get("candidates")]
+    if data and data.get("category") and len(offer) > 1 and not any(
+            "selected" in i for i in data["items"]):
+        # the items are not chosen yet: the harness asks that first, never a
+        # question about one item before the officer chose what goes forward
+        opts = [f"{i['name']} ({narrow.count(i['candidates'])})" for i in offer] + [ALL]
+        q = "Which of these do you want to take forward?"
+        data["choosing"] = {"question": q, "options": opts,
+                            "names": {narrow.norm(o): i["name"] for o, i in zip(opts, offer)}}
+        case.save(conn, data, session_id, "ask", "asked which materials go forward")
+        return q, {"question": q, "options": opts, "field": "nam", "multi": True}
     it = case.current_item(data) if data else None
     if it is not None and it.get("pending"):
         q = it["pending"]
@@ -1802,9 +1875,9 @@ def _asks_the_same(sentence: str, question: str) -> bool:
 
 # a short instruction about the buttons ("Please select one.", "Choose the ones you
 # need below."): the buttons say it themselves
-_BUTTON_HINT = re.compile(r"^\W*(?:please\s+)?(?:select|choose|pick|tap|click)\b[^.?!\d]{0,50}"
+_BUTTON_HINT = re.compile(r"^\W*(?:please\s+)?(?:select|choose|pick|tap|click|confirm)\b[^.?!\d]{0,50}"
                           r"\b(?:one|ones|option|options|below|above|apply|any|items?|"
-                          r"materials?)\b[^.?!\d]{0,30}"
+                          r"materials?|category|choice|selection)\b[^.?!\d]{0,30}"
                           r"[.!]?\W*$",
                           re.IGNORECASE)
 
@@ -1916,6 +1989,10 @@ def drop_typed_options(reply: str, ask: dict | None) -> str:
         if not line.strip() and out and not out[-1].strip():
             continue                  # one blank line where the list was, not two
         out.append(line)
+    out = [x for x in out if not re.fullmatch(r"\W*options?\W*", x, re.IGNORECASE)]
+    # the reply's own last question, just above the buttons, gives way to theirs
+    while out and (not out[-1].strip() or out[-1].strip().rstrip("*_ ").endswith("?")):
+        out.pop()
     text = "\n".join(out).strip()
     if question:
         text = (text + "\n\n" if text else "") + question
@@ -1985,7 +2062,13 @@ def plain_words(reply: str, data: dict, tool_calls: list[dict] | None = None) ->
             if c.get("key") and not c.get("code") and c["key"] != c.get("description"):
                 names[c["key"]] = c.get("description") or ""
     for key, desc in sorted(names.items(), key=lambda kv: -len(kv[0])):
-        reply = reply.replace(f"**{key}**", desc).replace(key, desc)
+        reply = re.sub(r"\*\*" + re.escape(key) + r"\*\*|" + re.escape(key), lambda m: desc,
+                       reply, flags=re.IGNORECASE)
+    # the PUR cases the case knows (its records, its ranking, its PRs)
+    purs = {p.upper() for p in re.findall(r"PUR-[A-Z]+-\d+", json.dumps(data, default=str))}
+    for c in tool_calls or []:
+        purs |= {p.upper() for p in re.findall(r"PUR-[A-Z]+-\d+", str(c.get("output") or ""))}
+    shown_purs = any(c.get("tool") == "nam_tenders" for c in tool_calls or [])
     rel_codes = (data.get("related") or {}).get("codes") or {}
     related = {narrow.norm(d)[:40] for d in rel_codes.values() if narrow.norm(d)} | {
         narrow.norm(k) for k in rel_codes if narrow.norm(k)}
@@ -2000,6 +2083,22 @@ def plain_words(reply: str, data: dict, tool_calls: list[dict] | None = None) ->
     i = 0
     while i < len(lines):
         line = lines[i]
+        made_up = [p for p in re.findall(r"PUR-[A-Za-z0-9]+-\d+", line) if p.upper() not in purs]
+        if made_up:
+            i += 1                       # a PUR case SAP holds nowhere for this case
+            continue
+        if shown_purs and _TABLE_ROW.match(line):
+            # the PUR ranking is shown as cards: a typed copy of it goes
+            j = i
+            while j < len(lines) and _TABLE_ROW.match(lines[j]):
+                j += 1
+            block = lines[i:j]
+            if sum(bool(re.search(r"PUR-[A-Z]+-\d+", x)) for x in block) >= 2:
+                i = j
+                continue
+            out += block
+            i = j
+            continue
         if read_related and _TABLE_ROW.match(line):
             # a whole table at once: it goes when it lists what nam_related read
             j = i
@@ -2069,6 +2168,7 @@ def check_reply(conn, session_id: str, reply: str, tool_calls: list[dict]) -> st
         for sentence in re.split(r"(?<=[.!?])\s+|\n+", out):
             if i["name"].lower() in sentence.lower() and _CART.search(sentence) and not _NEG.search(
                     sentence):
+                out = re.sub(r"\n{3,}", "\n\n", out.replace(sentence, "").strip())
                 notes.append(f"'{i['name']}' is not in the cart yet: it goes in when the officer "
                              "continues with one of its records")
                 break

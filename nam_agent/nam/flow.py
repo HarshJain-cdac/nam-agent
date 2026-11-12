@@ -92,10 +92,10 @@ STEPS: tuple[Step, ...] = (
          "Whenever the officer wants a step back: an answer, a choice, a material in the "
          "cart, a PR field.",
          "nam_undo(steps)"),
-    Step("1j", 1, "Matching PURs",
-         "With the cart full, the PUR cases that hold the most of the need's materials (the "
-         "cart's codes and the materials not taken forward too), with their PR and PO; the "
-         "PUR holding the most is the 100% match.",
+    Step("1j", 1, "Matching PURs (when asked)",
+         "Only when the officer asks for them: the PUR cases that hold the most of the "
+         "need's materials, with their PR and PO; the PUR holding the most is the 100% match. "
+         "The flow's own end is each item on ONE past PR, then its new PR.",
          "nam_tenders(); kg_tender_record(PUR) for what SAP does not show"),
     Step("2a", 2, "Estimate (only when asked)",
          "The cart's last prices, brought up to today at 7% a year, checked (YRS, CAGR: "
@@ -184,12 +184,10 @@ def stage_of(case: dict | None) -> tuple[str, str]:
     if now is not None:
         return ("1f" if now.get("pending") else "1e"), "1h"
     if nam_case.review(case) in ("due", "asked", "adding"):
-        return "1h", "1j"
+        return "1h", "3a"
     chosen = nam_case.chosen(case)
     if all((it.get("pr") or {}).get("status") in ("ready_for_sap", "sent") for it in chosen):
         return "3b", "done"
-    if not case.get("matched") and len(items) > 1:
-        return "1j", "3a"
     return "3a", "3b"
 
 
@@ -256,10 +254,6 @@ def next_hint(case: dict | None) -> str:
                     "continues with it, put it in the cart with nam_pick (key, pr).")
         return (f"{left} records are still in for '{name}': ask what tells them apart with "
                 "nam_ask.")
-    if not case.get("matched") and len(items) > 1 and stage_of(case)[1] != "done":
-        return ("every chosen item is in the cart: show the matching PURs with nam_tenders(); "
-                + ("then ask whether the officer wants one common PR for them."
-                   if len([i for i in nam_case.chosen(case) if i.get("picked")]) > 1 else ""))
     chosen = nam_case.chosen(case)
     common = case.get("common_pr") or {}
     if common:

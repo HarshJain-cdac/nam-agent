@@ -751,3 +751,12 @@ def co_bought(kg_url: str, items: list[dict], call=None, per_item: int = 3,
             row["latest"] = max([row["latest"], *dates])
     ranked = sorted(rows.values(), key=lambda r: (len(r["prs"]), r["latest"]), reverse=True)
     return {"prs": prs, "rows": ranked, "problems": problems}
+
+
+def best_pr(c: dict) -> dict | None:
+    """The one past PR a record is finished on when it was bought on several:
+    the latest year first, then the best status (PR + PO, before PR ongoing,
+    before a cancelled PO), the latest date within. SAP's own data decides;
+    the other PRs stay on record for the officer to see why."""
+    prs = prs_of(c)
+    return by_year_then_status(prs)[0] if prs else None

@@ -333,8 +333,8 @@ def test_details_and_the_cart_are_saved_item_by_item(t):
     assert valve["status"] == "in the cart" and valve["details"] == [
         "(the officer's own words): screwed"]
     assert valve["cart"] == {"code": "V-2", "short_text": "GATE VALVE 2IN", "quantity": 4.0,
-                             "unit": "NOS", "pur": "PUR-B"}
-    assert "- valve: IN CART V-2 GATE VALVE 2IN, quantity 4.0 NOS, PUR PUR-B." in text
+                             "unit": "NOS", "pr": "0010000002", "pur": "PUR-B"}
+    assert "- valve: IN CART V-2 GATE VALVE 2IN, quantity 4.0 NOS, from past PR 0010000002." in text
     assert d["items"][1]["cart"]["code"] == "T-1" and (d["now"], d["next"]) == (None, None)
 
 
@@ -475,7 +475,9 @@ def test_each_item_is_finished_on_one_pr_its_pr_drafted_quietly_then_the_next(t)
     assert valve["picked"]["pr_no"] == "10000002" and valve["pr"]["status"] == "draft"
 
 
-def test_a_record_in_several_prs_shows_them_and_waits_for_the_officers_pr(t):
+def test_a_record_in_several_prs_is_finished_on_the_best_one_by_sap_data(t):
+    """The end is ONE past PR: a record bought on several is put on the
+    latest with its PO placed, the others named for the officer to see."""
     sap = {"valve": {"results": [
         _line("V-9", "GATE VALVE 4IN", "PUR-A", pr="10000011", date="2023-01-01"),
         _line("V-9", "GATE VALVE 4IN", "PUR-B", pr="10000012", po="4500000012",
@@ -486,10 +488,17 @@ def test_a_record_in_several_prs_shows_them_and_waits_for_the_officers_pr(t):
     token = chatstate.enter("chat-p")
     try:
         tools["nam_need"].fn(need="valve", category="goods")
-        out, cards = _emitted(t, lambda: tools["nam_pick"].fn(key="V-9", quantity=1))
-        assert "is in 2 PRs" in out and not case.item(case.for_session(conn, "chat-p"),
-                                                         "valve").get("picked")
-        assert [c["title"] for c in cards[-1]["cards"]] == ["PR 0010000012", "PR 0010000011"]
+        from nam_agent.nam import cards as cards_mod
+
+        rec = case.item(case.for_session(conn, "chat-p"), "valve")["candidates"][0]
+        group = cards_mod.records("valve", [rec])
+        assert [c["title"] for c in group["cards"]] == ["PR 0010000012"]      # one PR card
+        assert {"text": "also on PR 0010000011"} in group["cards"][0]["chips"]
+        out = tools["nam_pick"].fn(key="V-9", quantity=1)
+        assert "from PR 0010000012" in out                                    # the latest
+        chatstate.mark_asked("")                       # the next turn
+        # the officer may still name the other PR themselves
+        tools["nam_pick"].fn(item="valve", remove=True)
         assert "not in PR" in tools["nam_pick"].fn(key="V-9", pr="999", quantity=1)
         out = tools["nam_pick"].fn(key="V-9", pr="0010000011", quantity=1)
         assert "from PR 0010000011" in out
@@ -570,9 +579,7 @@ def test_with_every_item_drafted_the_agent_is_pointed_to_offer_a_common_pr(t):
     from nam_agent.nam import flow
 
     _cart(t)
-    assert "matching PURs" in flow.next_hint(_data(t))           # the PURs come first
-    t["nam_tenders"].fn()
-    hint = flow.next_hint(_data(t))
+    hint = flow.next_hint(_data(t))                             # no PUR step before the PRs
     assert "whether they want one common PR for valve, thermowell" in hint
     assert "items not taken forward (gasket)" in hint
 

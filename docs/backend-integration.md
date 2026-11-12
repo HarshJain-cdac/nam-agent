@@ -178,7 +178,7 @@ whatever its `group`:
 
 | `group` | What it holds |
 |---|---|
-| `records` | the past PRs that match the item still being narrowed: one card per PR, the matching SAP records inside it |
+| `records` | the past PRs that match the item still being narrowed: each record on ONE PR, the best by SAP's data (the latest year, then PR + PO before PR ongoing before a cancelled PO), the other PRs it was on named as "also on PR ..."; one card per PR, the matching records inside it |
 | `cart` | "Added to the cart": what was just put in the cart (item, code, PR, PUR, quantity, last rate, "1 of 3 in the cart"); and "Your cart": every item, when all are in and the officer is asked whether that is everything |
 | `pr` | one item's PR, or the common PR, with the fields still missing marked |
 | `purs` | PUR cases, with how many of the need's materials each holds |

@@ -135,6 +135,11 @@ class NamAgent:
                 # a side question mid-case: its answer, then the case's open
                 # question again with its checked options (nam_agent/nam/stage_tools.py)
                 self._nam_reminder(result, notify, stream)
+                # the loop's own "iteration limit" words are never the officer's
+                # to read when the harness showed them a question with buttons
+                if (captured.get("ask") or captured.get("cards")) and (
+                        result.reply or "").startswith("(I hit my iteration limit"):
+                    result.reply = result.reply.split(")", 1)[1].strip()
                 # the buttons show the options: a copy the model typed goes; and a
                 # list of material codes offered as choices never reaches the officer
                 if self.session.nam_guide and not self._nam_driver_on():

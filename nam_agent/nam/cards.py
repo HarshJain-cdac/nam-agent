@@ -60,14 +60,20 @@ def records(item: str, cands: list[dict], answers: list[dict] | None = None) -> 
     officer's message, and the record and PR they stand for, which the
     harness keeps with the case to read the click exactly."""
     by: dict[str, list[tuple[dict, dict]]] = {}
+    also: dict[str, list[str]] = {}
     for c in cands:
-        prs = narrow.prs_of(c)
-        if not prs:
+        # each record on ONE PR: the best of its PRs by SAP's data (the latest,
+        # then PR + PO first); its other PRs are named, not shown as cards
+        best = narrow.best_pr(c)
+        if best is None:
             st = narrow.status_of(c.get("lines") or [])
-            prs = [{"pr_no": "", "lines": c.get("lines") or [], **st, "po": [], "pur": "",
-                    "job": "", "last": _last_order(c)}]
-        for p in prs:
-            by.setdefault(p["pr_no"], []).append((c, p))
+            best = {"pr_no": "", "lines": c.get("lines") or [], **st, "po": [], "pur": "",
+                    "job": "", "last": _last_order(c)}
+        others = [p["pr_no"] for p in narrow.prs_of(c) if p["pr_no"] != best["pr_no"]]
+        if others:
+            also.setdefault(best["pr_no"], []).extend(o for o in others
+                                                       if o not in also.get(best["pr_no"], []))
+        by.setdefault(best["pr_no"], []).append((c, best))
     rows, choices = [], {}
     for pr_no, pairs in by.items():
         p0 = pairs[0][1]
@@ -105,7 +111,9 @@ def records(item: str, cands: list[dict], answers: list[dict] | None = None) -> 
             "chips": [{"text": f"{len(items)} matching item{'s' if len(items) > 1 else ''}",
                        "strong": True}]
                      + [{"text": f"PO {narrow.doc_no(x)}"} for x in p0["po"][:2]]
-                     + ([{"text": p0["pur"]}] if p0["pur"] else []),
+                     + ([{"text": "also on PR " + ", ".join(narrow.doc_no(x)
+                                                            for x in also[pr_no][:3])}]
+                        if also.get(pr_no) else []),
             "items": items,
             "foot": f"PR date {p0['latest']}" if p0["latest"] else "",
             "action": {"label": "Continue with this", "pick": True,
@@ -196,7 +204,6 @@ def added(item: str, p: dict, n: int, of: int) -> dict:
         "fields": _fields(("Item", item, ""), ("Code", p.get("code"), "code"),
                           ("PR", narrow.doc_no(p.get("pr_no")), ""),
                           ("PO", _orders(p), ""),
-                          ("PUR", p.get("pur"), ""),
                           ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
                                         if p.get("quantity") else ""), ""),
                           ("Last rate", _rs(last.get("rate_inr")), "")),
@@ -219,7 +226,6 @@ def cart(data: dict) -> dict:
             "fields": _fields(("Item", it["name"], ""), ("Code", p.get("code"), "code"),
                               ("PR", narrow.doc_no(p.get("pr_no")), ""),
                               ("PO", _orders(p), ""),
-                              ("PUR", p.get("pur"), ""),
                               ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
                                             if p.get("quantity") else ""), ""),
                               ("Last rate", _rs(last.get("rate_inr")), ""))})

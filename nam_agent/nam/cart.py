@@ -23,7 +23,7 @@ case's current version.
 from __future__ import annotations
 
 from nam_agent.nam import case as nam_case
-from nam_agent.nam import guard
+from nam_agent.nam import guard, narrow
 
 DONE = ("ready_for_sap", "sent")
 
@@ -81,7 +81,7 @@ def node_data(data: dict) -> dict:
             "details": _details(it),
             "cart": ({"code": p.get("code") or p.get("key"), "short_text": p.get("description"),
                       "quantity": p.get("quantity"), "unit": p.get("unit"),
-                      "pur": p.get("pur")} if p else None),
+                      "pr": narrow.doc_no(p.get("pr_no")), "pur": p.get("pur")} if p else None),
         })
     waiting = [r["item"] for r in rows if r["status"] == "waiting"]
     guess = (data.get("asking_category") or {}).get("guess") or ""
@@ -107,7 +107,8 @@ def node(data: dict) -> str:
         if r["cart"]:
             c = r["cart"]
             line += (f" IN CART {c['code']} {guard.sanitise(c['short_text'] or '', 80)}, "
-                     f"quantity {c['quantity'] or '?'} {c['unit'] or ''}, PUR {c['pur'] or '-'}.")
+                     f"quantity {c['quantity'] or '?'} {c['unit'] or ''}"
+                     + (f", from past PR {c['pr']}" if c.get("pr") else "") + ".")
         elif r["status"] not in ("not searched", "waiting for the category"):
             line += f" SAP holds {r['found']} record(s)"
             if r["still_in"] is not None and r["still_in"] != r["found"]:
