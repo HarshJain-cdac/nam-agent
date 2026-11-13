@@ -350,7 +350,7 @@ def test_nothing_suggested_when_the_past_prs_hold_nothing_else(tmp_path):
 def test_after_that_is_everything_the_chat_ends_on_a_plain_summary_not_pr_fields(t):
     _all_in_cart(t)
     out, _ = _click(t, stage_tools.DONE_LABEL)
-    assert "Write a short summary for someone who is not a buyer" in out
+    assert "Write a short summary of the whole need for" in out
     assert "following past PR 0010000002, its PO 4500000003" in out
     # the agent may not start the PR, nor ask for its fields, until the officer asks
     out, _ = _turn(t, "ok thanks", lambda n: t["nam_pr"].fn(item="valve", action="fill"))
@@ -358,3 +358,29 @@ def test_after_that_is_everything_the_chat_ends_on_a_plain_summary_not_pr_fields
     out, _ = _turn(t, "now raise the PR for the valve",
                    lambda n: t["nam_pr"].fn(item="valve", action="fill"))
     assert not out.startswith("REFUSED")
+
+
+def test_the_need_ends_on_one_card_per_item_with_its_matching_pr_and_a_summary(t):
+    _all_in_cart(t)
+    out, shown = _click(t, stage_tools.DONE_LABEL)
+    final = next(ev for kind, ev in shown if kind == "nam_cards" and ev.get("group") == "final")
+    assert final["title"] == "Your need: the matching PR for each item"
+    assert [c["badge"] for c in final["cards"]] == ["Item 1 of 2", "Item 2 of 2"]
+    valve = final["cards"][0]
+    fields = dict((k, v) for k, v, _ in valve["fields"])
+    assert fields["PR"] == "0010000002" and fields["PO"] == "4500000003"
+    assert fields["Quantity"] == "4 NOS" and fields["Your answers"] == "screwed"
+    assert valve["status"] == "PR + PO" and valve["subtitle"] == "valve"
+    assert valve["note"].startswith("4 NOS of GATE VALVE 2IN as bought on PR 0010000002")
+    assert "It matches what you chose: screwed." in valve["note"]
+    assert "not a buyer" in out and "Then stop: ask for nothing" in out
+
+
+def test_the_past_prs_and_pos_in_the_summary_are_no_claim_of_a_new_order(t):
+    _all_in_cart(t)
+    _click(t, stage_tools.DONE_LABEL)
+    past = ("The valve last came from PR 0010000002, with purchase orders 4500000003. "
+            "The thermowell was bought under PO 4500000004.")
+    assert stage_tools.claims(t["_conn"], "chat-r", past, []) is None
+    assert stage_tools.claims(t["_conn"], "chat-r", "The PR is confirmed and a purchase order "
+                              "has been raised.", []) is not None

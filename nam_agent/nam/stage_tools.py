@@ -1173,6 +1173,11 @@ class Steps:
         chosen = case.chosen(data)
         from nam_agent.nam import cards as _cards
 
+        # the end of the need: each item's matching past PR and its summary, as
+        # cards side by side
+        chatstate.emit("nam_cards", _cards.final(data))
+        chatstate.mark_done("cards")
+
         facts, total = [], 0.0
         for i in chosen:
             q = i["picked"]
@@ -1190,11 +1195,13 @@ class Steps:
         return (f"The cart is complete: the need is understood. FOR YOU: the facts of each item,"
                 " to tell the officer in plain everyday words.\n" + "\n".join(facts)
                 + (f"\nIn all, about {_rs(total)} at the last rates." if total else "")
-                + "\nWrite a short summary for someone who is not a buyer: what is being "
-                "procured and what each item is for in their need, how many, roughly what it "
-                "cost last time, and the past PR and PO it follows (by number). No material "
-                "codes, no table, no field names. Then stop: ask for nothing. The PR is raised "
-                "only when the officer asks for it (then nam_pr).", data["case_id"])
+                + "\nThe officer now sees one card per item with its matching past PR, its "
+                "data and a one-line summary. Write a short summary of the whole need for "
+                "someone who is not a buyer: what is being procured and what each item is for, "
+                "how many, roughly what it cost last time, and the past PR and PO it follows "
+                "(by number). No material codes, no table, no field names. Then stop: ask for "
+                "nothing. A new PR form is filled only when the officer asks for it (then "
+                "nam_pr).", data["case_id"])
 
     # -- 1j: the matching PURs ----------------------------------------------------------
 
@@ -1924,9 +1931,16 @@ def read_click(conn, session_id: str, message: str) -> tuple[str, dict] | None:
     return None
 
 
+# a claim that something was DONE now: confirmed, sent, or an order made. A
+# mention of the past PRs and POs a need follows ("came from PR ..., with
+# purchase orders ...") is not one
 _CLAIM = re.compile(r"\b(confirmed|finali[sz]ed|ready for sap|sent to sap|submitted to sap|"
-                    r"purchase orders?|PO numbers?|POs? (?:is |are |has been |have been )?"
-                    r"(?:created|raised|issued)|PR number)\b", re.IGNORECASE)
+                    r"(?:purchase orders?|POs?) (?:is |are |has been |have been |was |were )?"
+                    r"(?:created|raised|issued|placed|generated)|"
+                    r"(?:created|raised|issued|placed|generated) (?:the |a |an )?"
+                    r"(?:purchase orders?|POs?)|"
+                    r"PR number (?:is |was |has been )?(?:assigned|generated|created))\b",
+                    re.IGNORECASE)
 _NEG = re.compile(r"\b(not|no|never|yet to|cannot|can't|before|once|until|when|if|would|will)\b",
                   re.IGNORECASE)
 

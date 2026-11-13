@@ -230,3 +230,53 @@ def cart(data: dict) -> dict:
                                             if p.get("quantity") else ""), ""),
                               ("Last rate", _rs(last.get("rate_inr")), ""))})
     return {"group": "cart", "title": "Your cart", "cards": rows}
+
+
+def _plain_answer(a: str) -> str:
+    """An option as the officer chose it, without its count: "0-100°C"."""
+    return narrow._COUNT.sub("", str(a or "")).strip()
+
+
+def final(data: dict) -> dict:
+    """The need's end: for each chosen item, the past PR it matched through the
+    officer's answers, with that PR's data and a summary in plain words. One
+    card per item, side by side."""
+    from nam_agent.nam import case
+
+    chosen = [i for i in case.chosen(data) if i.get("picked")]
+    rows = []
+    for n, it in enumerate(chosen, 1):
+        p = it["picked"]
+        lines = p.get("lines") or []
+        st = narrow.status_of(lines)
+        last = next((ln for ln in lines if ln.get("rate_inr")), {})
+        rate = last.get("rate_inr")
+        qty = p.get("quantity")
+        value = float(rate) * float(qty) if rate and qty else None
+        said = [_plain_answer(a.get("answer")) for a in it.get("answers") or []
+                if a.get("answer")]
+        qty_text = f"{qty:g} {p.get('unit') or ''}".strip() if qty else ""
+        summary = " ".join(x for x in (
+            f"{qty_text} of {p.get('description') or it['name']}" if qty_text
+            else (p.get("description") or it["name"]) + ",",
+            f"as bought on PR {narrow.doc_no(p.get('pr_no'))}" if p.get("pr_no") else "",
+            f"({st['latest']})" if st.get("latest") else "",
+            f"with PO {_orders(p)}" if _orders(p) else "",
+            f"at {_rs(rate)} each, about {_rs(value)} in all." if value else
+            (f"at {_rs(rate)} each." if rate else "."),
+            ("It matches what you chose: " + "; ".join(said) + ".") if said else "") if x)
+        rows.append({
+            "title": p.get("description") or it["name"],
+            "badge": f"Item {n} of {len(chosen)}",
+            "status": st["label"], "year": st["year"], "latest": st["latest"], "rank": st["rank"],
+            "subtitle": it["name"],
+            "fields": _fields(("PR", narrow.doc_no(p.get("pr_no")), ""),
+                              ("PR date", st.get("latest"), ""),
+                              ("PO", _orders(p), ""),
+                              ("Material code", p.get("code"), "code"),
+                              ("Quantity", qty_text, ""),
+                              ("Last rate", _rs(rate), ""),
+                              ("Value", _rs(value) if value else "", ""),
+                              ("Your answers", "; ".join(said), "")),
+            "note": summary})
+    return {"group": "final", "title": "Your need: the matching PR for each item", "cards": rows}
