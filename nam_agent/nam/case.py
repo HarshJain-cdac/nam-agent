@@ -178,6 +178,19 @@ def for_session(conn: sqlite3.Connection, session_id: str) -> dict | None:
     row = conn.execute("SELECT case_id FROM nam_flow_case WHERE session_id = ? AND tenant = ? "
                        "ORDER BY updated_at DESC LIMIT 1",
                        (session_id, current().tenant)).fetchone()
+    data = load(conn, row[0]) if row else None
+    # a case the officer cancelled is over: the chat starts afresh
+    return None if data and data.get("closed") else data
+
+
+def last_for_session(conn: sqlite3.Connection, session_id: str) -> dict | None:
+    """The chat's last case, closed or not (an undo reopens a cancelled one)."""
+    if not session_id:
+        return None
+    ensure(conn)
+    row = conn.execute("SELECT case_id FROM nam_flow_case WHERE session_id = ? AND tenant = ? "
+                       "ORDER BY updated_at DESC LIMIT 1",
+                       (session_id, current().tenant)).fetchone()
     return load(conn, row[0]) if row else None
 
 
@@ -227,7 +240,7 @@ def versions(conn: sqlite3.Connection, case_id: str) -> list[dict]:
 # the acts undo takes back: the officer's (an ask, a search or a read is the
 # agent's, and is gone over with the act it led to)
 OFFICER_ACTS = ("need", "choose", "answer", "detail", "pick", "unpick", "other", "estimate",
-                "pr", "review")
+                "pr", "review", "cancel")
 
 
 def _version(conn: sqlite3.Connection, case_id: str, v: int) -> dict | None:

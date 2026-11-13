@@ -141,7 +141,7 @@ Reply:
 | Field | Meaning |
 |---|---|
 | `session_id` | the chat; send it with the next message |
-| `case_id` | the NAM case this chat opened, or `null` before the need opens one |
+| `case_id` | the chat's open NAM case, or `null` before the need opens one or after the officer cancels it; a changed need gives a new `case_id` |
 | `reply` | the agent's answer, Markdown |
 | `ask_options` | present when the agent asks a question with choices: show one button per option. With `"multi": true` several may be chosen. `progress`, when present, says which of the chosen materials the question is about: `{"n": 1, "of": 2, "item": "gasket"}`, shown as "Material 1 of 2 · gasket". |
 | `cards` | present when the turn shows SAP records, PUR cases, a PR or a cart addition (section 4.2) |

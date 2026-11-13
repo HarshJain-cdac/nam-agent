@@ -223,8 +223,9 @@ class Steps:
     def _session(self) -> str:
         return chatstate.current()
 
-    def _case(self) -> dict:
-        data = case.for_session(self.conn, self._session())
+    def _case(self, closed: bool = False) -> dict:
+        data = (case.last_for_session(self.conn, self._session()) if closed
+                else case.for_session(self.conn, self._session()))
         if data is None:
             raise Stop("No case is open in this chat: call nam_need with the officer's need "
                        "first.")
@@ -307,7 +308,7 @@ class Steps:
     # -- 1a-1c ---------------------------------------------------------------------
 
     def need(self, need: str = "", category: str = "", why: str = "", items=None,
-             new: bool = False, add: bool = False, _notify=None):
+             new: bool = False, add: bool = False, remove=None, _notify=None):
         self._may("need")
         category = (category or "").strip().lower()
         if category and category not in CATEGORIES:
@@ -318,7 +319,32 @@ class Steps:
         need = (need or "").strip() or ", ".join(names)
         if new and chatstate.done("need"):
             new = False          # a case was opened or set this turn: it is the one
+        if remove:
+            return self._remove(remove)
+        if new:
+            # starting over: the chat's open case is closed, not left behind
+            old = case.for_session(self.conn, self._session())
+            if old is not None and not case.confirmed(old):
+                old["closed"] = "the officer started over"
+                self._save(old, "need", "the officer started over with a new need")
         data = None if new else case.for_session(self.conn, self._session())
+        if data is not None and not add:
+            old = {i["name"].lower() for i in data["items"]}
+            old_words = set(narrow.words(data.get("need") or "")) | {
+                w for i in data["items"] for w in narrow.words(i["name"])}
+            if names and not old & {n.lower() for n in names}:
+                # the officer changed their mind: a different need is a new case,
+                # the old one closed (never its materials kept under the new need)
+                if case.confirmed(data):
+                    raise Stop("This case has a confirmed PR: start the new need as another "
+                               "case with new=true.")
+                data["closed"] = "replaced by: " + (need or ", ".join(names))
+                self._save(data, "need", "the officer changed the need to: "
+                           + (need or ", ".join(names)))
+                data = None
+            elif not names and need and not set(narrow.words(need)) & old_words:
+                raise Stop("The officer gave a different need: name the materials it is for as "
+                           "items=[...] (they replace the old ones, in a new case), or new=true.")
         said = narrow.words(chatstate.message())
         guess = ""
         if category and data is None and said and not any(
@@ -470,6 +496,49 @@ class Steps:
                 + "\n".join(rows) + notes + f"\nNext: {nxt}", data["case_id"])
 
     # -- 1d: which items go forward -------------------------------------------------
+
+    def _remove(self, remove) -> tuple[str, str]:
+        """Materials the officer no longer wants, out of the case and its cart."""
+        data = self._case()
+        gone = [" ".join(str(n).split()) for n in (remove if isinstance(remove, list) else [remove])
+                if str(n).strip()]
+        found = [case.item(data, n) for n in gone]
+        unknown = [n for n, it in zip(gone, found) if it is None]
+        if unknown:
+            raise Stop(f"No material {unknown} in the case; it holds: "
+                       + ", ".join(i["name"] for i in data["items"]) + ".")
+        locked = [it["name"] for it in found if it["name"] in case.confirmed(data)]
+        if locked:
+            raise Stop(f"{', '.join(locked)} has a confirmed PR: it stays.")
+        names = {it["name"] for it in found}
+        left = [i for i in data["items"] if i["name"] not in names]
+        if not left:
+            raise Stop("That would leave the need with nothing: if the officer wants to stop, "
+                       "close the case with nam_cancel.")
+        data["items"] = left
+        for key in ("review", "matched", "common_asked", "choosing", "common_pr"):
+            data.pop(key, None)
+        data = self._save(data, "need", "took out of the need: " + ", ".join(sorted(names)))
+        chosen = case.chosen(data)
+        now = case.current_item(data)
+        return (f"Taken out of the need and the cart: {', '.join(sorted(names))}. The need holds "
+                f"{', '.join(i['name'] for i in data['items'])}; the cart "
+                f"{sum(1 for i in chosen if i.get('picked'))} of {len(chosen)}."
+                + (f" Now '{now['name']}'." if now is not None else ""), data["case_id"])
+
+    def cancel(self, reason: str = ""):
+        """The officer does not want this need any more: the case is closed, and
+        nothing of it is asked again. A later need starts a new case."""
+        self._may("need")
+        data = self._case()
+        if case.confirmed(data):
+            raise Stop("A PR of this case is confirmed: it stays. Tell the officer so.")
+        data["closed"] = guard.sanitise(" ".join((reason or "the officer cancelled it").split()),
+                                        200)
+        data = self._save(data, "cancel", f"the officer cancelled the case: {data['closed']}")
+        return (f"{data['case_id']} is cancelled ({data['closed']}). Nothing of it is asked "
+                "again; tell the officer in one line, and a new need starts a new case.",
+                data["case_id"])
 
     def related(self):
         """What NRL bought together with the need's materials on their past PRs,
@@ -1176,7 +1245,7 @@ class Steps:
         self._not_asked()
         if chatstate.clicked() == "nam_undo":
             raise Stop("The officer's undo was already done this turn (see the case above).")
-        data = self._case()
+        data = self._case(closed=True)          # undo reopens a case cancelled or replaced
         data, taken = case.undo(self.conn, data, self._session(), steps)
         now = case.current_item(data)
         out = f"Took back: {'; '.join(taken)}.\n{case.summary(data)}"
@@ -1537,7 +1606,8 @@ def make_tools(conn, home: Path, kg_url: str, call=None, kg: bool = True) -> lis
               "their answer comes back as nam_need(category=...). Then each material is "
               "searched in SAP and counted, by short text and long text. add=true with items= "
               "puts more materials into this same case and cart (the officer wants to add "
-              "more); new=true starts another case.",
+              "more); remove=[...] takes materials out of it; items= naming other materials "
+              "than the case's is a new need (the old case closes); new=true starts over.",
               {"need": {"type": "string", "description": "The need in the officer's words"},
                "category": {"type": "string", "enum": list(CATEGORIES)},
                "why": {"type": "string", "description": "Why the need is that category, in "
@@ -1546,8 +1616,16 @@ def make_tools(conn, home: Path, kg_url: str, call=None, kg: bool = True) -> lis
                "items": {"type": "array", "items": {"type": "string"},
                          "description": "The materials the need names, one short name each"},
                "add": {"type": "boolean", "description": "Add items= to this case's cart"},
+               "remove": {"type": "array", "items": {"type": "string"},
+                          "description": "Materials to take out of the case and its cart"},
                "new": {"type": "boolean"}}, [],
               lambda **a: s._run("nam_need", s.need, **a), notify=True),
+        _tool("nam_cancel", "The officer wants to stop: they cancel this need, or do not want "
+              "it any more. Closes the chat's case; nothing of it is asked again, and a new "
+              "need starts a new case. (A different need is nam_need with its materials: the "
+              "old case closes by itself.)",
+              {"reason": {"type": "string", "description": "In the officer's words"}}, [],
+              lambda **a: s._run("nam_cancel", s.cancel, **a)),
         _tool("nam_related", "PR Creation Flow 1d: before the choice of items, what NRL "
               "bought together with the need's materials on their latest past PRs, from SAP, "
               "with how often. For you to judge which belong to this need; suggest only those, "

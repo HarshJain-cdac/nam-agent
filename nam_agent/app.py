@@ -199,6 +199,11 @@ class NamAgent:
         if not domain.enabled(getattr(self.settings, "kg_url", ""),
                               getattr(self.settings, "domain_only", None)):
             return result
+        # a reply about the chat's own NAM case (changing it, stopping it, a word
+        # about it) is procurement work: the check is for requests outside NAM
+        if (self.session.nam_guide and "Open case in this chat" in self.session.nam_guide) or any(
+                str(c.get("tool", "")).startswith("nam_") for c in result.tool_calls):
+            return result
         try:
             if self._nam_domain is None:
                 from nam_agent.nam import llm as nam_llm

@@ -185,6 +185,25 @@ Every tool call is one row in the hash-chained audit log (`nam_agent/nam/audit.p
   next item starts. The officer is never asked to choose a material code: an
   option only a code carries is refused.
 
+## The officer leads
+
+At any point the officer can change the requirement, and the agent changes the
+case with its tools, so the record the backend reads (`case_id`, the case and
+its cart node) always matches the chat:
+
+| The officer | The agent's tool | The case |
+|---|---|---|
+| gives a different need | `nam_need(need, items)` | a new case; the old one is closed ("replaced by ..."); its category is asked again |
+| starts over | `nam_need(..., new=true)` | a new case; the old one closed |
+| wants more materials | `nam_need(items, add=true)` | the same case and cart, the counts grow |
+| wants fewer | `nam_need(remove=[...])` | out of the case and its cart |
+| stops | `nam_cancel(reason)` | closed: nothing of it is asked again; the chat's `case_id` becomes `null` |
+| changes the category, the choice, a record, a PR, a quantity | `nam_need(category)`, `nam_choose`, `nam_pick(remove=true)`, `nam_other`, `nam_pick(pr=...)`, `nam_pick(quantity=...)` | changed in place |
+| takes a step back | `nam_undo` | the last act undone; it reopens a cancelled or replaced case |
+
+A confirmed PR stays: it is never removed, replaced or cancelled. While a case
+is open, talk about it is never treated as outside NAM.
+
 ## One PR for several items
 
 With two or more items in the cart, no PR is confirmed until the officer

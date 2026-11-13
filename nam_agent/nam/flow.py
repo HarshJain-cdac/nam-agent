@@ -125,6 +125,17 @@ SOURCES_KG = ("- Two sources, two tools. SAP gives the numbers: how many, which 
 
 RULES = (
     "How you work the PR Creation Flow:\n"
+    "- The officer leads, at any point, and you change the case for them with your tools "
+    "(the case is the record the backend reads, so a change said only in words is not made):\n"
+    "  a different need: nam_need(need=..., items=[...]) (the old case closes by itself; its "
+    "category is asked again) | start over: nam_need(new=true, ...) | stop: nam_cancel | "
+    "more materials in the same cart: nam_need(items=[...], add=true) | fewer: "
+    "nam_need(remove=[...]) | another category: nam_need(category=...) | another choice of "
+    "items: nam_choose(items=[...]) | other words to search a material: nam_search | a "
+    "different record or PR: nam_pick(remove=true), nam_other, or nam_pick(pr=...) | a "
+    "quantity: nam_pick(item, quantity=...) | take back the last step: nam_undo (it reopens a "
+    "cancelled case too).\n"
+    "  Never keep asking a question the officer has moved away from.\n"
     "- The main output is understanding the need: which materials, and for each chosen one "
     "the exact material code. You decide each next step from the officer's message and the "
     "case below; the steps are a guide, not a script. Skip what the case already has; go "
