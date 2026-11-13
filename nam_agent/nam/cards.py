@@ -204,6 +204,7 @@ def added(item: str, p: dict, n: int, of: int) -> dict:
         "fields": _fields(("Item", item, ""), ("Code", p.get("code"), "code"),
                           ("PR", narrow.doc_no(p.get("pr_no")), ""),
                           ("PO", _orders(p), ""),
+                              ("PUR", p.get("pur"), ""),
                           ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
                                         if p.get("quantity") else ""), ""),
                           ("Last rate", _rs(last.get("rate_inr")), "")),
@@ -226,6 +227,7 @@ def cart(data: dict) -> dict:
             "fields": _fields(("Item", it["name"], ""), ("Code", p.get("code"), "code"),
                               ("PR", narrow.doc_no(p.get("pr_no")), ""),
                               ("PO", _orders(p), ""),
+                              ("PUR", p.get("pur"), ""),
                               ("Quantity", (f"{p.get('quantity'):g} {p.get('unit') or ''}".strip()
                                             if p.get("quantity") else ""), ""),
                               ("Last rate", _rs(last.get("rate_inr")), ""))})
@@ -273,6 +275,7 @@ def final(data: dict) -> dict:
             "fields": _fields(("PR", narrow.doc_no(p.get("pr_no")), ""),
                               ("PR date", st.get("latest"), ""),
                               ("PO", _orders(p), ""),
+                              ("PUR", p.get("pur"), ""),
                               ("Material code", p.get("code"), "code"),
                               ("Quantity", qty_text, ""),
                               ("Last rate", _rs(rate), ""),

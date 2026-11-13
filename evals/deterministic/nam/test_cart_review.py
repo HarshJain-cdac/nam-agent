@@ -384,3 +384,14 @@ def test_the_past_prs_and_pos_in_the_summary_are_no_claim_of_a_new_order(t):
     assert stage_tools.claims(t["_conn"], "chat-r", past, []) is None
     assert stage_tools.claims(t["_conn"], "chat-r", "The PR is confirmed and a purchase order "
                               "has been raised.", []) is not None
+
+
+def test_the_pur_case_is_a_field_inside_the_cards_not_a_heading(t):
+    _, shown = _all_in_cart(t)
+    whole = next(ev for kind, ev in shown if kind == "nam_cards" and ev["title"] == "Your cart")
+    assert dict((k, v) for k, v, _ in whole["cards"][0]["fields"])["PUR"] == "PUR-B"
+    _, shown = _click(t, stage_tools.DONE_LABEL)
+    final = next(ev for kind, ev in shown if kind == "nam_cards" and ev.get("group") == "final")
+    card = final["cards"][0]
+    assert dict((k, v) for k, v, _ in card["fields"])["PUR"] == "PUR-B"
+    assert "PUR" not in card["title"] and "PUR" not in final["title"]
