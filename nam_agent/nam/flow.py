@@ -195,7 +195,7 @@ def stage_of(case: dict | None) -> tuple[str, str]:
     if now is not None:
         return ("1f" if now.get("pending") else "1e"), "1h"
     if nam_case.review(case) in ("due", "asked", "adding"):
-        return "1h", "3a"
+        return "1h", "done"
     chosen = nam_case.chosen(case)
     if all((it.get("pr") or {}).get("status") in ("ready_for_sap", "sent") for it in chosen):
         return "3b", "done"
@@ -274,6 +274,10 @@ def next_hint(case: dict | None) -> str:
             return ("ask the officer, in plain words, for the common PR: "
                     + ", ".join(common["missing"]) + ".")
         return "show the common PR and confirm it on the officer's word (nam_pr common=true)."
+    if nam_case.review(case) == "done" and not case.get("pr_asked"):
+        return ("the need is understood and the cart complete: if not done yet, summarise it "
+                "for the officer in plain everyday words and stop. The PR (nam_pr) only when "
+                "the officer asks for it; never ask for its fields before.")
     drafted = [i for i in chosen if i.get("picked") and i.get("pr")]
     done = any((i.get("pr") or {}).get("status") in ("ready_for_sap", "sent") for i in chosen)
     if len(drafted) >= 2 and len(drafted) == len(chosen) and not done \

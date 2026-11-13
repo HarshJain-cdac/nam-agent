@@ -1090,6 +1090,13 @@ class Steps:
         chatstate.mark_asked(q["question"])
         return data
 
+    def _pr_asked(self) -> bool:
+        """The officer asked for the PR (or this is a direct call, not a chat turn)."""
+        if not chatstate.message():
+            return True
+        return bool(re.search(r"\bP\.?R\b|requisition|\braise\b|indent", self._officer_words(),
+                              re.IGNORECASE))
+
     def _officer_words(self) -> str:
         """Everything the officer said in this chat, this message too."""
         said = [chatstate.message()]
@@ -1164,12 +1171,30 @@ class Steps:
         data["review"] = {"done": True}
         data = self._save(data, "review", "the officer said the cart is complete")
         chosen = case.chosen(data)
-        nxt = ("each item's PR (nam_pr item=..., action='fill'); the PUR cases (nam_tenders) "
-               "only if the officer asks for them" if len(case.chosen(data)) > 1 else
-               "the item's PR (nam_pr action='fill')")
-        return (f"The cart is complete: {len(chosen)} item(s), "
-                + ", ".join(i["name"] for i in chosen) + f". Next: {nxt}. An estimate for the "
-                "cart only if the officer asks.", data["case_id"])
+        from nam_agent.nam import cards as _cards
+
+        facts, total = [], 0.0
+        for i in chosen:
+            q = i["picked"]
+            last = next((ln for ln in q.get("lines") or [] if ln.get("rate_inr")), {})
+            rate = last.get("rate_inr")
+            value = (float(rate) * float(q["quantity"])) if rate and q.get("quantity") else None
+            total += value or 0
+            facts.append(f"- {i['name']}: {q['description']}; "
+                         f"{_num(q['quantity']) if q.get('quantity') else '-'} {q['unit']}"
+                         + (f"; last bought at {_rs(rate)} each" if rate else "")
+                         + (f" (about {_rs(value)} for this quantity)" if value else "")
+                         + (f"; following past PR {narrow.doc_no(q['pr_no'])}" if q.get("pr_no")
+                            else "")
+                         + (f", its PO {_cards._orders(q)}" if _cards._orders(q) else ""))
+        return (f"The cart is complete: the need is understood. FOR YOU: the facts of each item,"
+                " to tell the officer in plain everyday words.\n" + "\n".join(facts)
+                + (f"\nIn all, about {_rs(total)} at the last rates." if total else "")
+                + "\nWrite a short summary for someone who is not a buyer: what is being "
+                "procured and what each item is for in their need, how many, roughly what it "
+                "cost last time, and the past PR and PO it follows (by number). No material "
+                "codes, no table, no field names. Then stop: ask for nothing. The PR is raised "
+                "only when the officer asks for it (then nam_pr).", data["case_id"])
 
     # -- 1j: the matching PURs ----------------------------------------------------------
 
@@ -1412,6 +1437,12 @@ class Steps:
         data = self._case()
         if action != "show":
             self._review_gate(data, "the PR")
+            if not data.get("pr_asked"):
+                if not self._pr_asked():
+                    raise Stop("The need is complete and summarised: the PR is raised only "
+                               "when the officer asks for it. Do not ask for its fields (date, "
+                               "plant, storage location, justification) until they do.")
+                data["pr_asked"] = True
         if action in ("combine", "split") or common or (data.get("common_pr")
                                                         and not item.strip()):
             return self._common(data, action, items, delivery_date, plant, storage_location,

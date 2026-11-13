@@ -153,7 +153,8 @@ def test_the_purs_and_the_prs_wait_until_the_officer_says_that_is_everything(t):
     assert out.startswith("REFUSED: Not yet the PR")
     assert t["nam_pr"].fn(item="valve", action="show")         # looking is fine
     out, _ = _click(t, stage_tools.DONE_LABEL)
-    assert out.startswith("The cart is complete: 2 item(s), valve, thermowell.")
+    assert out.startswith("The cart is complete: the need is understood.")
+    assert "- valve: GATE VALVE 2IN; 4 NOS" in out and "Then stop: ask for nothing" in out
     assert case.review(_data(t)) == "done"
     out, _ = _turn(t, "", lambda n: t["nam_tenders"].fn(**_note(t["nam_tenders"], n), ))
     assert not out.startswith("REFUSED")
@@ -344,3 +345,16 @@ def test_nothing_suggested_when_the_past_prs_hold_nothing_else(tmp_path):
     assert "hold nothing else" in out and "Suggest nothing" in out
     data = case.for_session(conn, "chat-r")
     assert "nam_related" not in flow.next_hint(data)          # asked once, then on with it
+
+
+def test_after_that_is_everything_the_chat_ends_on_a_plain_summary_not_pr_fields(t):
+    _all_in_cart(t)
+    out, _ = _click(t, stage_tools.DONE_LABEL)
+    assert "Write a short summary for someone who is not a buyer" in out
+    assert "following past PR 0010000002, its PO 4500000003" in out
+    # the agent may not start the PR, nor ask for its fields, until the officer asks
+    out, _ = _turn(t, "ok thanks", lambda n: t["nam_pr"].fn(item="valve", action="fill"))
+    assert out.startswith("REFUSED: The need is complete and summarised: the PR is raised only")
+    out, _ = _turn(t, "now raise the PR for the valve",
+                   lambda n: t["nam_pr"].fn(item="valve", action="fill"))
+    assert not out.startswith("REFUSED")

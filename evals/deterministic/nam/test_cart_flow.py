@@ -579,6 +579,9 @@ def test_with_every_item_drafted_the_agent_is_pointed_to_offer_a_common_pr(t):
     from nam_agent.nam import flow
 
     _cart(t)
+    # the need understood: a plain summary, and the PR only when the officer asks
+    assert "summarise it for the officer in plain everyday words" in flow.next_hint(_data(t))
+    t["nam_pr"].fn(item="valve", action="fill")                  # the officer asked for the PR
     hint = flow.next_hint(_data(t))                             # no PUR step before the PRs
     assert "whether they want one common PR for valve, thermowell" in hint
     assert "items not taken forward (gasket)" in hint

@@ -50,7 +50,7 @@ def _said(message):
 
 def test_a_pr_field_the_officer_never_gave_is_refused(t):
     _in_cart(t)
-    token = _said("2026-12-01")
+    token = _said("raise the PR, needed 2026-12-01")
     try:
         out = t["nam_pr"].fn(item="valve", action="set", delivery_date="2026-12-01",
                              plant="P1", storage_location="S1",
@@ -59,7 +59,7 @@ def test_a_pr_field_the_officer_never_gave_is_refused(t):
         chatstate.leave(token)
     assert out.startswith("REFUSED: The officer has not given Plant, Storage location, "
                           "Justification: a PR field is the officer's")
-    token = _said("by 1st December, plant 1100, store 0001, the old valve is leaking")
+    token = _said("PR: by 1st December, plant 1100, store 0001, the old valve is leaking")
     try:
         out = t["nam_pr"].fn(item="valve", action="set", delivery_date="2026-12-01",
                              plant="1100", storage_location="0001",
